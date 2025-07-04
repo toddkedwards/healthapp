@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎮 GeekFit - Gamified Fitness App for Geeks/Nerds
 
 A React Native mobile app that transforms fitness into an epic RPG adventure! Earn XP, complete quests, battle bosses, and unlock abilities while staying active and healthy.
@@ -226,3 +227,6 @@ For support, email support@geekfit.app or join our Discord community.
 **Made with ❤️ for geeks, nerds, and fitness enthusiasts everywhere!**
 
 *Level up your fitness game! 🎮💪* 
+=======
+# healthapp
+>>>>>>> 5455d0eb53bd8b69d7ed91c57e1addba693efae1
