@@ -39,15 +39,7 @@ export default function DashboardScreen() {
   //   checkAndUnlockAchievements();
   // }, []);
 
-  // Play background music when component mounts
-  useEffect(() => {
-    soundService.playBackgroundMusic('menu');
-    
-    // Cleanup when component unmounts
-    return () => {
-      soundService.stopBackgroundMusic();
-    };
-  }, []);
+
 
   return (
     <PixelBackground pattern="grid" animated={true}>

@@ -19,16 +19,11 @@ export default function AudioSettingsScreen() {
   const { theme } = useTheme();
   const {
     isSoundEnabled,
-    musicVolume,
     sfxVolume,
     hapticsEnabled,
-    currentMusic,
     toggleSound,
-    setMusicVolume,
     setSFXVolume,
     setHapticsEnabled,
-    playBackgroundMusic,
-    stopBackgroundMusic,
     playButtonClick,
     playVictory,
     playDefeat,
@@ -39,11 +34,6 @@ export default function AudioSettingsScreen() {
     playMagicSpell,
     triggerHaptic,
   } = useAudio();
-
-  const handleMusicVolumeChange = (value: number) => {
-    setMusicVolume(value);
-    triggerHaptic('light');
-  };
 
   const handleSFXVolumeChange = (value: number) => {
     setSFXVolume(value);
@@ -62,19 +52,7 @@ export default function AudioSettingsScreen() {
     }
   };
 
-  const playMusicPreview = async (musicType: string) => {
-    try {
-      await playBackgroundMusic(musicType);
-      triggerHaptic('light');
-      
-      // Stop preview after 5 seconds
-      setTimeout(async () => {
-        await stopBackgroundMusic();
-      }, 5000);
-    } catch (error) {
-      console.log('Music preview failed:', error);
-    }
-  };
+  // Remove playMusicPreview and renderMusicPreview
 
   const playSoundPreview = (soundType: string) => {
     triggerHaptic('light');
@@ -120,7 +98,6 @@ export default function AudioSettingsScreen() {
           text: 'Reset',
           style: 'destructive',
           onPress: () => {
-            setMusicVolume(0.3);
             setSFXVolume(0.5);
             setHapticsEnabled(true);
             
@@ -202,30 +179,6 @@ export default function AudioSettingsScreen() {
     </View>
   );
 
-  const renderMusicPreview = (musicType: string, title: string, icon: string) => (
-    <TouchableOpacity
-      style={[
-        styles.musicPreviewItem,
-        { 
-          backgroundColor: theme.colors.surface,
-          borderColor: currentMusic === musicType ? theme.colors.primary : theme.colors.textSecondary,
-        }
-      ]}
-      onPress={() => playMusicPreview(musicType)}
-      activeOpacity={0.8}
-    >
-      <PixelIcon name={icon} size={32} color={theme.colors.text} />
-      <PixelText style={[styles.musicPreviewTitle, { color: theme.colors.text }]}>
-        {title}
-      </PixelText>
-      {currentMusic === musicType && (
-        <PixelText style={[styles.playingIndicator, { color: theme.colors.primary }]}>
-          Playing...
-        </PixelText>
-      )}
-    </TouchableOpacity>
-  );
-
   const renderSoundPreview = (soundType: string, title: string, icon: string) => (
     <TouchableOpacity
       style={[styles.soundPreviewItem, { backgroundColor: theme.colors.surface }]}
@@ -272,12 +225,6 @@ export default function AudioSettingsScreen() {
             Volume Controls
           </PixelText>
           {renderVolumeSlider(
-            'Background Music',
-            musicVolume,
-            handleMusicVolumeChange,
-            'musical-notes'
-          )}
-          {renderVolumeSlider(
             'Sound Effects',
             sfxVolume,
             handleSFXVolumeChange,
@@ -309,23 +256,6 @@ export default function AudioSettingsScreen() {
               Test Haptic Feedback
             </PixelText>
           </TouchableOpacity>
-        </View>
-
-        {/* Music Previews */}
-        <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
-          <PixelText style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Background Music Previews
-          </PixelText>
-          <View style={styles.musicGrid}>
-            {renderMusicPreview('menu', 'Main Menu', 'home')}
-            {renderMusicPreview('battle', 'Battle', 'sword')}
-            {renderMusicPreview('shop', 'Shop', 'bag')}
-            {renderMusicPreview('gallery', 'Gallery', 'images')}
-            {renderMusicPreview('forest', 'Forest', 'leaf')}
-            {renderMusicPreview('cave', 'Cave', 'moon')}
-            {renderMusicPreview('castle', 'Castle', 'home')}
-            {renderMusicPreview('dungeon', 'Dungeon', 'skull')}
-          </View>
         </View>
 
         {/* Sound Effect Previews */}

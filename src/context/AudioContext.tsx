@@ -4,18 +4,13 @@ import { soundService } from '../services/soundService';
 interface AudioContextType {
   // Audio state
   isSoundEnabled: boolean;
-  musicVolume: number;
   sfxVolume: number;
   hapticsEnabled: boolean;
-  currentMusic: string | null;
   
   // Audio controls
   toggleSound: () => void;
-  setMusicVolume: (volume: number) => void;
   setSFXVolume: (volume: number) => void;
   setHapticsEnabled: (enabled: boolean) => void;
-  playBackgroundMusic: (musicType: string) => Promise<void>;
-  stopBackgroundMusic: () => Promise<void>;
   
   // Sound effects
   playButtonClick: () => void;
@@ -40,10 +35,8 @@ interface AudioProviderProps {
 
 export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
-  const [musicVolume, setMusicVolumeState] = useState(0.3);
   const [sfxVolume, setSfxVolumeState] = useState(0.5);
   const [hapticsEnabled, setHapticsEnabledState] = useState(true);
-  const [currentMusic, setCurrentMusic] = useState<string | null>(null);
 
   // Initialize audio service
   useEffect(() => {
@@ -52,7 +45,6 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
 
   // Load audio settings from service
   useEffect(() => {
-    setMusicVolumeState(soundService.getMusicVolume());
     setSfxVolumeState(soundService.getSFXVolume());
     setHapticsEnabledState(soundService.isHapticsEnabled());
   }, []);
@@ -61,19 +53,10 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     const newState = !isSoundEnabled;
     setIsSoundEnabled(newState);
     
-    if (!newState) {
-      soundService.stopBackgroundMusic();
-      setCurrentMusic(null);
-    } else {
+    if (newState) {
       soundService.initialize();
     }
     
-    soundService.triggerHaptic('light');
-  };
-
-  const setMusicVolume = (volume: number) => {
-    setMusicVolumeState(volume);
-    soundService.setMusicVolume(volume);
     soundService.triggerHaptic('light');
   };
 
@@ -88,26 +71,6 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     soundService.setHapticsEnabled(enabled);
     if (enabled) {
       soundService.triggerHaptic('light');
-    }
-  };
-
-  const playBackgroundMusic = async (musicType: string) => {
-    if (!isSoundEnabled) return;
-    
-    try {
-      setCurrentMusic(musicType);
-      await soundService.playBackgroundMusic(musicType as any);
-    } catch (error) {
-      console.log('Background music failed:', error);
-    }
-  };
-
-  const stopBackgroundMusic = async () => {
-    try {
-      await soundService.stopBackgroundMusic();
-      setCurrentMusic(null);
-    } catch (error) {
-      console.log('Stop music failed:', error);
     }
   };
 
@@ -183,16 +146,11 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
 
   const value: AudioContextType = {
     isSoundEnabled,
-    musicVolume,
     sfxVolume,
     hapticsEnabled,
-    currentMusic,
     toggleSound,
-    setMusicVolume,
     setSFXVolume,
     setHapticsEnabled,
-    playBackgroundMusic,
-    stopBackgroundMusic,
     playButtonClick,
     playVictory,
     playDefeat,

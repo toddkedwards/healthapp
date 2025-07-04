@@ -78,15 +78,7 @@ export default function PixelArtGalleryScreen() {
     return { total, unlocked, progress, byCategory, byRarity };
   }, [allSprites]);
 
-  // Play background music when component mounts
-  React.useEffect(() => {
-    soundService.playBackgroundMusic('gallery');
-    
-    // Cleanup when component unmounts
-    return () => {
-      soundService.stopBackgroundMusic();
-    };
-  }, []);
+
 
   const handleSpritePress = (sprite: PixelArtSprite) => {
     soundService.playButtonClick();

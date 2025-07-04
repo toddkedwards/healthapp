@@ -25,6 +25,20 @@ export default function ShopScreen() {
   const { user, addCoins, updateUser } = useUser();
   const { showNotification } = useNotification();
   const [activeCategory, setActiveCategory] = useState<ShopCategory>('all');
+  const [purchasedItems, setPurchasedItems] = useState<Set<string>>(new Set());
+
+  // Load purchased items from user data
+  useEffect(() => {
+    const purchased = new Set<string>();
+    
+    // Add equipment IDs
+    user.equipment.forEach(item => purchased.add(item.id));
+    
+    // Add ability IDs
+    user.unlockedAbilities.forEach(abilityId => purchased.add(abilityId));
+    
+    setPurchasedItems(purchased);
+  }, [user]);
 
   const categories: { key: ShopCategory; label: string; icon: string }[] = [
     { key: 'all', label: 'All', icon: 'grid' },
@@ -37,38 +51,57 @@ export default function ShopScreen() {
   const getFilteredItems = (): (ShopItem | Ability)[] => {
     const allItems = [...mockShopItems, ...mockAbilities];
     
-    switch (activeCategory) {
-      case 'abilities':
-        return allItems.filter(item => 'category' in item && item.category === 'combat');
-      case 'boosts':
-        return allItems.filter(item => 'type' in item && item.type === 'boost');
-      case 'cosmetics':
-        return allItems.filter(item => 'type' in item && item.type === 'cosmetic');
-      case 'special':
-        return allItems.filter(item => 'type' in item && item.type === 'special');
-      default:
-        return allItems;
+    if (activeCategory === 'all') {
+      return allItems.filter(item => !purchasedItems.has(item.id));
     }
+    
+    return allItems.filter(item => {
+      if (purchasedItems.has(item.id)) return false;
+      
+      if (activeCategory === 'abilities' && 'category' in item) {
+        return true; // All abilities
+      }
+      
+      if (activeCategory === 'boosts' && 'type' in item) {
+        return item.type === 'boost';
+      }
+      
+      if (activeCategory === 'cosmetics' && 'type' in item) {
+        return item.type === 'cosmetic';
+      }
+      
+      if (activeCategory === 'special' && 'type' in item) {
+        return item.type === 'special';
+      }
+      
+      return false;
+    });
   };
 
   const canAfford = (item: ShopItem | Ability): boolean => {
-    if ('currency' in item) {
-      // ShopItem
-      return item.currency === 'coins' ? user.coins >= item.cost : user.xp >= item.cost;
-    } else {
-      // Ability
-      return user.coins >= item.cost;
+    const cost = 'cost' in item ? item.cost : 0;
+    const currency = 'currency' in item ? item.currency : 'coins';
+    
+    if (currency === 'coins') {
+      return user.coins >= cost;
+    } else if (currency === 'xp') {
+      return user.xp >= cost;
     }
+    
+    return false;
   };
 
   const getItemCost = (item: ShopItem | Ability): string => {
-    if ('currency' in item) {
-      // ShopItem
-      return item.currency === 'coins' ? `🪙 ${item.cost}` : `⭐ ${item.cost}`;
-    } else {
-      // Ability
-      return `🪙 ${item.cost}`;
+    const cost = 'cost' in item ? item.cost : 0;
+    const currency = 'currency' in item ? item.currency : 'coins';
+    
+    if (currency === 'coins') {
+      return `🪙 ${cost}`;
+    } else if (currency === 'xp') {
+      return `⭐ ${cost}`;
     }
+    
+    return `🪙 ${cost}`;
   };
 
   const purchaseItem = (item: ShopItem | Ability) => {
@@ -78,75 +111,133 @@ export default function ShopScreen() {
       return;
     }
 
+    const cost = 'cost' in item ? item.cost : 0;
+    const currency = 'currency' in item ? item.currency : 'coins';
+
+    // Deduct currency
+    if (currency === 'coins') {
+      addCoins(-cost);
+    } else if (currency === 'xp') {
+      // For XP purchases, we need to update user XP
+      updateUser({ xp: user.xp - cost });
+    }
+
+    // Handle different item types
+    if ('category' in item) {
+      // This is an Ability
+      if (!user.unlockedAbilities.includes(item.id)) {
+        updateUser({
+          unlockedAbilities: [...user.unlockedAbilities, item.id]
+        });
+      }
+    } else {
+      // This is a ShopItem
+      if (item.type === 'equipment') {
+        // Add to equipment
+        const newEquipment = {
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          type: 'weapon' as const, // Default type, could be enhanced
+          slot: 'weapon' as const, // Default slot, could be enhanced
+          rarity: 'common' as const, // Default rarity, could be enhanced
+          stats: {}, // Default stats, could be enhanced
+          icon: item.icon,
+          isEquipped: false,
+        };
+        
+        updateUser({
+          equipment: [...user.equipment, newEquipment]
+        });
+      } else if (item.type === 'boost') {
+        // Apply boost effect immediately
+        if (item.id === 'health_potion') {
+          updateUser({
+            health: Math.min(user.maxHealth, user.health + 50)
+          });
+        } else if (item.id === 'energy_drink') {
+          updateUser({
+            energy: Math.min(user.maxEnergy, user.energy + 30)
+          });
+        }
+      }
+    }
+
+    // Add to purchased items
+    setPurchasedItems(prev => new Set([...prev, item.id]));
+
     soundService.playPurchaseSuccess();
     showNotification(`${item.name} purchased successfully!`, 'success');
-    
-    // Purchase logic here
-    // Update user currency, add item to inventory, etc.
   };
 
-  // Play background music when component mounts
-  useEffect(() => {
-    soundService.playBackgroundMusic('shop');
-    
-    // Cleanup when component unmounts
-    return () => {
-      soundService.stopBackgroundMusic();
-    };
-  }, []);
+
 
   const handleCategoryChange = (category: ShopCategory) => {
     soundService.playTabSwitch();
     setActiveCategory(category);
   };
 
-  const renderShopItem = ({ item }: { item: ShopItem | Ability }) => (
-    <View
-      style={[
-        styles.shopItem,
-        { backgroundColor: theme.colors.surface },
-        !canAfford(item) && styles.itemDisabled,
-      ]}
-    >
-      <View style={styles.itemHeader}>
-        <Text style={styles.itemIcon}>
-          {'icon' in item ? item.icon : '⚡'}
+  const renderShopItem = ({ item }: { item: ShopItem | Ability }) => {
+    const isPurchased = purchasedItems.has(item.id);
+    const canBuy = canAfford(item) && !isPurchased;
+
+    return (
+      <View
+        style={[
+          styles.shopItem,
+          { backgroundColor: theme.colors.surface },
+          !canBuy && styles.itemDisabled,
+          isPurchased && styles.itemPurchased,
+        ]}
+      >
+        <View style={styles.itemHeader}>
+          <Text style={styles.itemIcon}>
+            {'icon' in item ? item.icon : '⚡'}
+          </Text>
+          <View style={styles.itemInfo}>
+            <Text style={[styles.itemName, { color: theme.colors.text }]}>
+              {item.name}
+            </Text>
+            <Text style={[styles.itemType, { color: theme.colors.textSecondary }]}>
+              {'type' in item ? item.type.toUpperCase() : 'ABILITY'}
+            </Text>
+          </View>
+          <View style={styles.itemCost}>
+            <Text style={[styles.costText, { color: theme.colors.accent }]}>
+              {getItemCost(item)}
+            </Text>
+            <RetroButton
+              title={isPurchased ? "Purchased" : "Purchase"}
+              onPress={() => !isPurchased && purchaseItem(item)}
+              variant={isPurchased ? "secondary" : "success"}
+              size="small"
+              disabled={!canBuy}
+            />
+          </View>
+        </View>
+        
+        <Text style={[styles.itemDescription, { color: theme.colors.textSecondary }]}>
+          {item.description}
         </Text>
-        <View style={styles.itemInfo}>
-          <Text style={[styles.itemName, { color: theme.colors.text }]}>
-            {item.name}
-          </Text>
-          <Text style={[styles.itemType, { color: theme.colors.textSecondary }]}>
-            {'type' in item ? item.type.toUpperCase() : 'ABILITY'}
-          </Text>
-        </View>
-        <View style={styles.itemCost}>
-                     <Text style={[styles.costText, { color: theme.colors.accent }]}>
-             {getItemCost(item)}
-           </Text>
-          <RetroButton
-            title="Purchase"
-            onPress={() => purchaseItem(item)}
-            variant="success"
-            size="small"
-            disabled={!canAfford(item)}
-          />
-        </View>
+        
+        {!canBuy && !isPurchased && (
+          <View style={styles.insufficientFunds}>
+            <Text style={[styles.insufficientText, { color: theme.colors.error }]}>
+              Insufficient funds
+            </Text>
+          </View>
+        )}
+
+        {isPurchased && (
+          <View style={styles.purchasedIndicator}>
+            <Text style={[styles.purchasedText, { color: theme.colors.success }]}>
+              ✓ Purchased
+            </Text>
+          </View>
+        )}
       </View>
-      
-      <Text style={[styles.itemDescription, { color: theme.colors.textSecondary }]}>
-        {item.description}
-      </Text>
-      
-      {!canAfford(item) && (
-        <View style={styles.insufficientFunds}>
-          <Text style={[styles.insufficientText, { color: theme.colors.error }]}>
-            Insufficient funds
-          </Text>
-        </View>
-      )}
-    </View>
-  );
+    );
+  };
 
   return (
     <PixelBackground pattern="shop" animated={true}>
@@ -316,6 +407,9 @@ const styles = StyleSheet.create({
   itemDisabled: {
     opacity: 0.6,
   },
+  itemPurchased: {
+    opacity: 0.7,
+  },
   itemHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -359,6 +453,18 @@ const styles = StyleSheet.create({
     borderTopColor: '#ff4444',
   },
   insufficientText: {
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+    fontFamily: 'monospace',
+  },
+  purchasedIndicator: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 2,
+    borderTopColor: '#4CAF50', // A green color for purchased
+  },
+  purchasedText: {
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',

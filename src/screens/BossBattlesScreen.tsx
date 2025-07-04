@@ -39,15 +39,7 @@ export default function BossBattlesScreen() {
     user.unlockedAbilities.includes(ability.id)
   );
 
-  // Play background music when component mounts
-  useEffect(() => {
-    soundService.playBackgroundMusic('battle');
-    
-    // Cleanup when component unmounts
-    return () => {
-      soundService.stopBackgroundMusic();
-    };
-  }, []);
+
 
   const startBattle = (boss: Boss) => {
     const newCombatState = combatService.startCombat(boss, user);

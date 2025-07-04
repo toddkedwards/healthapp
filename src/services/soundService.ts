@@ -5,9 +5,6 @@ import * as Haptics from 'expo-haptics';
 class RetroSoundService {
   private audioContext: AudioContext | null = null;
   private isEnabled: boolean = true;
-  private backgroundMusic: Audio.Sound | null = null;
-  private currentMusic: string | null = null;
-  private musicVolume: number = 0.3;
   private sfxVolume: number = 0.5;
   private hapticsEnabled: boolean = true;
 
@@ -307,102 +304,7 @@ class RetroSoundService {
     return this.isEnabled;
   }
 
-  // Background Music Methods
-  async playBackgroundMusic(musicType: 'menu' | 'battle' | 'shop' | 'gallery' | 'forest' | 'cave' | 'castle' | 'desert' | 'ocean' | 'dungeon') {
-    if (!this.isEnabled || this.currentMusic === musicType) return;
 
-    try {
-      // Stop current music if playing
-      if (this.backgroundMusic) {
-        await this.backgroundMusic.stopAsync();
-        await this.backgroundMusic.unloadAsync();
-      }
-
-      // Generate retro background music based on type
-      this.currentMusic = musicType;
-      await this.generateBackgroundMusic(musicType);
-    } catch (error) {
-      console.log('Background music failed:', error);
-    }
-  }
-
-  private async generateBackgroundMusic(musicType: string) {
-    if (!this.audioContext || !this.isEnabled) return;
-
-    try {
-      // Create a simple retro music loop
-      const musicPattern = this.getMusicPattern(musicType);
-      const loopDuration = 8; // 8 seconds per loop
-      
-      setInterval(() => {
-        if (this.currentMusic === musicType && this.isEnabled) {
-          this.playMusicPattern(musicPattern);
-        }
-      }, loopDuration * 1000);
-
-      // Play initial pattern
-      this.playMusicPattern(musicPattern);
-    } catch (error) {
-      console.log('Music generation failed:', error);
-    }
-  }
-
-  private getMusicPattern(musicType: string): number[][] {
-    switch (musicType) {
-      case 'menu':
-        return [[261, 329, 392, 523], [392, 523, 659, 784]]; // C major progression
-      case 'battle':
-        return [[150, 200, 250, 300], [300, 250, 200, 150]]; // Dramatic low tones
-      case 'shop':
-        return [[523, 659, 784, 1047], [784, 659, 523, 392]]; // Upbeat progression
-      case 'gallery':
-        return [[392, 523, 659, 784], [659, 784, 1047, 1319]]; // Majestic progression
-      case 'forest':
-        return [[261, 329, 392, 523], [392, 523, 659, 784]]; // Nature-inspired
-      case 'cave':
-        return [[130, 174, 196, 261], [196, 261, 329, 392]]; // Deep, mysterious
-      case 'castle':
-        return [[523, 659, 784, 1047], [784, 1047, 1319, 1568]]; // Royal fanfare
-      case 'desert':
-        return [[174, 220, 261, 329], [261, 329, 392, 523]]; // Exotic scales
-      case 'ocean':
-        return [[261, 329, 392, 523], [392, 523, 659, 784]]; // Flowing progression
-      case 'dungeon':
-        return [[130, 174, 196, 261], [196, 261, 329, 392]]; // Dark atmosphere
-      default:
-        return [[261, 329, 392, 523], [392, 523, 659, 784]];
-    }
-  }
-
-  private playMusicPattern(pattern: number[][]) {
-    if (!this.audioContext || !this.isEnabled) return;
-
-    try {
-      pattern.forEach((chord, chordIndex) => {
-        setTimeout(() => {
-          chord.forEach((note, noteIndex) => {
-            setTimeout(() => {
-              this.generateRetroSound(note, 0.5, 'triangle');
-            }, noteIndex * 100);
-          });
-        }, chordIndex * 1000);
-      });
-    } catch (error) {
-      console.log('Music pattern failed:', error);
-    }
-  }
-
-  async stopBackgroundMusic() {
-    try {
-      if (this.backgroundMusic) {
-        await this.backgroundMusic.stopAsync();
-        await this.backgroundMusic.unloadAsync();
-      }
-      this.currentMusic = null;
-    } catch (error) {
-      console.log('Stop music failed:', error);
-    }
-  }
 
   // Enhanced Sound Effects
   playVictory() {
@@ -537,20 +439,12 @@ class RetroSoundService {
   }
 
   // Audio Settings
-  setMusicVolume(volume: number) {
-    this.musicVolume = Math.max(0, Math.min(1, volume));
-  }
-
   setSFXVolume(volume: number) {
     this.sfxVolume = Math.max(0, Math.min(1, volume));
   }
 
   setHapticsEnabled(enabled: boolean) {
     this.hapticsEnabled = enabled;
-  }
-
-  getMusicVolume(): number {
-    return this.musicVolume;
   }
 
   getSFXVolume(): number {
