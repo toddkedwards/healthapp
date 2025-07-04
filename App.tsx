@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { UserProvider } from './src/context/UserContext';
 import { QuestProvider } from './src/context/QuestContext';
 import { NotificationProvider } from './src/context/NotificationContext';
@@ -22,10 +23,12 @@ import AchievementsScreen from './src/screens/AchievementsScreen';
 import PixelArtGalleryScreen from './src/screens/PixelArtGalleryScreen';
 import AudioSettingsScreen from './src/screens/AudioSettingsScreen';
 import { HealthSettingsScreen } from './src/screens/HealthSettingsScreen';
+import AuthScreen from './src/screens/AuthScreen';
 
 const Tab = createBottomTabNavigator();
 
-export default function App() {
+function MainApp() {
+  const { user, loading } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -48,7 +51,7 @@ export default function App() {
     return () => clearInterval(loadingInterval);
   }, []);
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <ThemeProvider>
         <RetroLoadingScreen
@@ -59,6 +62,10 @@ export default function App() {
         />
       </ThemeProvider>
     );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
   }
 
   return (
@@ -132,5 +139,13 @@ export default function App() {
       </UserProvider>
         </AudioProvider>
     </ThemeProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }

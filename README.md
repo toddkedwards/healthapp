@@ -52,7 +52,12 @@ A React Native mobile app that transforms fitness into an epic RPG adventure! Ea
    npm install
    ```
 
-3. **Start the development server**
+3. **Set up Firebase** (see [FIREBASE_SETUP.md](./FIREBASE_SETUP.md))
+   - Create a Firebase project
+   - Enable Authentication and Firestore
+   - Update the configuration in `src/config/firebase.ts`
+
+4. **Start the development server**
    ```bash
    npm start
    ```
@@ -145,7 +150,7 @@ GeekFit/
 - **State Management**: React Context API
 - **UI Components**: Custom components with Expo Vector Icons
 - **Styling**: StyleSheet with dynamic theming
-- **Backend**: Firebase (planned)
+- **Backend**: Firebase (Authentication, Firestore Database)
 - **Health Integration**: Expo Health (planned)
 
 ## 🚀 Future Enhancements
