@@ -18,6 +18,8 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 // Screens
 import DashboardScreen from './src/screens/DashboardScreen';
+import QuestsScreen from './src/screens/QuestsScreen';
+import AchievementsScreen from './src/screens/AchievementsScreen';
 import BossBattlesScreen from './src/screens/BossBattlesScreen';
 import ShopScreen from './src/screens/ShopScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
@@ -167,6 +169,8 @@ function MainApp() {
                 })}
               >
                 <Tab.Screen name="Dashboard" component={DashboardScreen} />
+                <Tab.Screen name="Quests" component={QuestsScreen} />
+                <Tab.Screen name="Achievements" component={AchievementsScreen} />
                 <Tab.Screen name="Boss Battles" component={BossBattlesScreen} />
                 <Tab.Screen name="Shop" component={ShopScreen} />
                 <Tab.Screen name="Settings" component={SettingsScreen} />

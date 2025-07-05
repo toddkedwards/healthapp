@@ -4,10 +4,13 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseLog } from './QuickLogSection';
 import PixelText from './PixelText';
 import PixelIcon from './PixelIcon';
+import { RetroButton } from './RetroButton';
+import { soundService } from '../services/soundService';
 
 interface ExerciseHistoryProps {
   exercises: ExerciseLog[];
@@ -51,6 +54,7 @@ const formatTime = (date: Date): string => {
 
 export default function ExerciseHistory({ exercises, maxItems = 5 }: ExerciseHistoryProps) {
   const { theme } = useTheme();
+  const navigation = useNavigation();
   
   const recentExercises = exercises
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
@@ -77,9 +81,23 @@ export default function ExerciseHistory({ exercises, maxItems = 5 }: ExerciseHis
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-      <PixelText style={[styles.title, { color: theme.colors.text }]}>
-        📊 Recent Workouts
-      </PixelText>
+      <View style={styles.header}>
+        <PixelText style={[styles.title, { color: theme.colors.text }]}>
+          📊 Recent Workouts
+        </PixelText>
+        {exercises.length > maxItems && (
+          <RetroButton
+            title="View All"
+            onPress={() => {
+              soundService.playMenuNavigate();
+              // For now, navigate to Settings since we don't have a dedicated workouts screen
+              navigation.navigate('Settings' as never);
+            }}
+            variant="secondary"
+            size="small"
+          />
+        )}
+      </View>
       
       <ScrollView style={styles.exerciseList} showsVerticalScrollIndicator={false}>
         {recentExercises.map((exercise) => (
@@ -154,14 +172,16 @@ const styles = StyleSheet.create({
     borderColor: '#ffffff',
     borderRadius: 0,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'monospace',
-    marginBottom: 15,
-    borderBottomWidth: 2,
-    borderBottomColor: '#ffffff',
-    paddingBottom: 5,
   },
   emptyState: {
     alignItems: 'center',

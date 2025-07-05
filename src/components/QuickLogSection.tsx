@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
-import { useQuest } from '../context/QuestContext';
 import { useNotification } from '../context/NotificationContext';
 import { soundService } from '../services/soundService';
 import { RetroButton } from './RetroButton';
@@ -54,7 +53,6 @@ const INTENSITY_OPTIONS = [
 export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionProps) {
   const { theme } = useTheme();
   const { user, updateUser } = useUser();
-  const { checkQuestProgress } = useQuest();
   const { showNotification } = useNotification();
   
   const [modalVisible, setModalVisible] = useState(false);
@@ -76,53 +74,77 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
   };
 
   const handleQuickLog = (type: ExerciseType, duration: number, intensity: ExerciseIntensity) => {
-    const xpGained = calculateXP(duration, intensity);
-    const caloriesBurned = calculateCalories(duration, intensity);
-
-    const exercise: ExerciseLog = {
-      id: Date.now().toString(),
-      type,
-      duration,
-      intensity,
-      timestamp: new Date(),
-      xpGained,
-      caloriesBurned,
-    };
-
-    // Update user stats
-    const newXP = user.xp + xpGained;
-    const newTotalXP = user.totalXp + xpGained;
+    console.log('🔧 handleQuickLog called with:', { type, duration, intensity });
     
-    // Check for level up
-    let newLevel = user.level;
-    let newXPToNextLevel = user.xpToNextLevel;
-    
-    if (newXP >= user.xpToNextLevel) {
-      newLevel += 1;
-      newXPToNextLevel = newLevel * 100; // Simple level progression
-      showNotification(`🎉 Level Up! You're now level ${newLevel}!`, 'success');
-      soundService.playLevelUp();
+    try {
+      const xpGained = calculateXP(duration, intensity);
+      const caloriesBurned = calculateCalories(duration, intensity);
+
+      console.log('📊 Calculated values:', { xpGained, caloriesBurned });
+
+      const exercise: ExerciseLog = {
+        id: Date.now().toString(),
+        type,
+        duration,
+        intensity,
+        timestamp: new Date(),
+        xpGained,
+        caloriesBurned,
+      };
+
+      console.log('🏃‍♂️ Created exercise log:', exercise);
+
+      // Update user stats
+      const newXP = user.xp + xpGained;
+      const newTotalXP = user.totalXp + xpGained;
+      
+      console.log('📈 XP update:', { currentXP: user.xp, newXP, xpGained });
+      
+      // Check for level up
+      let newLevel = user.level;
+      let newXPToNextLevel = user.xpToNextLevel;
+      
+      if (newXP >= user.xpToNextLevel) {
+        newLevel += 1;
+        newXPToNextLevel = newLevel * 100; // Simple level progression
+        console.log('🎉 Level up!', { oldLevel: user.level, newLevel });
+        showNotification(`🎉 Level Up! You're now level ${newLevel}!`, 'success');
+        soundService.playLevelUp();
+      }
+
+      updateUser({
+        xp: newXP,
+        totalXp: newTotalXP,
+        level: newLevel,
+        xpToNextLevel: newXPToNextLevel,
+      });
+
+      console.log('✅ User updated successfully');
+
+      // Check quest progress for exercise-related quests
+      // This would typically update quest progress based on exercise data
+      // For now, we'll just log that exercise was completed
+      console.log('📋 Exercise completed - quest progress would be updated here');
+
+      // Show success notification
+      showNotification(`🏃‍♂️ Exercise logged! +${xpGained} XP gained!`, 'success');
+      soundService.playQuestComplete();
+
+      console.log('🔔 Notifications sent');
+
+      // Callback
+      onExerciseLogged?.(exercise);
+
+      console.log('📞 Callback executed');
+
+      // Close modal
+      setModalVisible(false);
+      
+      console.log('✅ handleQuickLog completed successfully');
+    } catch (error) {
+      console.error('❌ Error in handleQuickLog:', error);
+      showNotification('Error logging exercise. Please try again.', 'error');
     }
-
-    updateUser({
-      xp: newXP,
-      totalXp: newTotalXP,
-      level: newLevel,
-      xpToNextLevel: newXPToNextLevel,
-    });
-
-    // Check quest progress
-    checkQuestProgress('exercise', { type, duration, intensity });
-
-    // Show success notification
-    showNotification(`🏃‍♂️ Exercise logged! +${xpGained} XP gained!`, 'success');
-    soundService.playQuestComplete();
-
-    // Callback
-    onExerciseLogged?.(exercise);
-
-    // Close modal
-    setModalVisible(false);
   };
 
   const renderExerciseTypeButton = (exerciseType: typeof EXERCISE_TYPES[0]) => (

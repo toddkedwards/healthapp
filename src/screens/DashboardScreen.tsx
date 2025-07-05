@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
 import { useQuest } from '../context/QuestContext';
@@ -26,6 +27,7 @@ import ExerciseHistory from '../components/ExerciseHistory';
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
+  const navigation = useNavigation();
   const { theme } = useTheme();
   const { user, fitnessData } = useUser();
   const { activeQuests, achievements } = useQuest();
@@ -109,7 +111,7 @@ export default function DashboardScreen() {
             title="Settings"
             onPress={() => {
               soundService.playMenuNavigate();
-              // Navigate to Health Settings screen
+              navigation.navigate('Settings' as never);
             }}
             variant="secondary"
             size="small"
@@ -122,7 +124,8 @@ export default function DashboardScreen() {
           }}
           onViewWorkouts={() => {
             soundService.playMenuNavigate();
-            // Navigate to workouts screen
+            // For now, navigate to Settings since we don't have a dedicated workouts screen
+            navigation.navigate('Settings' as never);
           }}
         />
       </View>
@@ -138,7 +141,7 @@ export default function DashboardScreen() {
             title="See All"
             onPress={() => {
               soundService.playMenuNavigate();
-              // Navigate to Quests screen
+              navigation.navigate('Quests' as never);
             }}
             variant="secondary"
             size="small"
@@ -160,7 +163,7 @@ export default function DashboardScreen() {
               title="See All"
               onPress={() => {
                 soundService.playMenuNavigate();
-                // Navigate to Achievements screen
+                navigation.navigate('Achievements' as never);
               }}
               variant="secondary"
               size="small"
