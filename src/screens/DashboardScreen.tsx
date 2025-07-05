@@ -20,6 +20,8 @@ import PixelIcon from '../components/PixelIcon';
 import { soundService } from '../services/soundService';
 import { mockQuests } from '../data/mockData';
 import { HealthDashboard } from '../components/HealthDashboard';
+import QuickLogSection, { ExerciseLog } from '../components/QuickLogSection';
+import ExerciseHistory from '../components/ExerciseHistory';
 
 const { width } = Dimensions.get('window');
 
@@ -27,11 +29,16 @@ export default function DashboardScreen() {
   const { theme } = useTheme();
   const { user, fitnessData } = useUser();
   const { activeQuests, achievements } = useQuest();
+  const [exerciseLogs, setExerciseLogs] = useState<ExerciseLog[]>([]);
 
   const dailyQuests = activeQuests.filter(quest => quest.type === 'daily');
   const recentAchievements = achievements.filter(achievement => achievement.isUnlocked).slice(0, 3);
 
   const progressPercentage = (user.xp / user.xpToNextLevel) * 100;
+
+  const handleExerciseLogged = (exercise: ExerciseLog) => {
+    setExerciseLogs(prev => [exercise, ...prev]);
+  };
 
   // Check for new achievements when component mounts
   // Temporarily disabled to fix loading issues
@@ -46,6 +53,11 @@ export default function DashboardScreen() {
       <ScrollView style={[styles.container, { backgroundColor: 'transparent' }]}>  
       {/* Retro RPG User Banner */}
       <RetroProfileBanner />
+
+      {/* Quick Log Exercise Section */}
+      <QuickLogSection
+        onExerciseLogged={handleExerciseLogged}
+      />
 
       {/* XP Progress */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
@@ -114,6 +126,9 @@ export default function DashboardScreen() {
           }}
         />
       </View>
+
+      {/* Exercise History */}
+      <ExerciseHistory exercises={exerciseLogs} maxItems={3} />
 
       {/* Daily Quests */}
       <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>

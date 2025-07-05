@@ -1,0 +1,509 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  Alert,
+} from 'react-native';
+import { useTheme } from '../context/ThemeContext';
+import { useUser } from '../context/UserContext';
+import { useQuest } from '../context/QuestContext';
+import { useNotification } from '../context/NotificationContext';
+import { soundService } from '../services/soundService';
+import { RetroButton } from './RetroButton';
+import PixelText from './PixelText';
+import PixelIcon from './PixelIcon';
+
+export interface ExerciseLog {
+  id: string;
+  type: ExerciseType;
+  duration: number;
+  intensity: ExerciseIntensity;
+  timestamp: Date;
+  xpGained: number;
+  caloriesBurned?: number;
+  notes?: string;
+}
+
+export type ExerciseType = 'cardio' | 'strength' | 'flexibility' | 'sports' | 'custom';
+export type ExerciseIntensity = 'light' | 'moderate' | 'intense';
+
+interface QuickLogSectionProps {
+  onExerciseLogged?: (exercise: ExerciseLog) => void;
+}
+
+const EXERCISE_TYPES = [
+  { type: 'cardio', label: 'Cardio', icon: 'heart', color: '#ff6b6b' },
+  { type: 'strength', label: 'Strength', icon: 'fitness', color: '#4ecdc4' },
+  { type: 'flexibility', label: 'Flexibility', icon: 'body', color: '#45b7d1' },
+  { type: 'sports', label: 'Sports', icon: 'football', color: '#96ceb4' },
+  { type: 'custom', label: 'Custom', icon: 'add-circle', color: '#feca57' },
+];
+
+const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120];
+
+const INTENSITY_OPTIONS = [
+  { level: 'light', label: 'Light', color: '#51cf66', xpMultiplier: 1 },
+  { level: 'moderate', label: 'Moderate', color: '#ffd43b', xpMultiplier: 1.5 },
+  { level: 'intense', label: 'Intense', color: '#ff6b6b', xpMultiplier: 2 },
+];
+
+export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionProps) {
+  const { theme } = useTheme();
+  const { user, updateUser } = useUser();
+  const { checkQuestProgress } = useQuest();
+  const { showNotification } = useNotification();
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedType, setSelectedType] = useState<ExerciseType>('cardio');
+  const [selectedDuration, setSelectedDuration] = useState(30);
+  const [selectedIntensity, setSelectedIntensity] = useState<ExerciseIntensity>('moderate');
+  const [customNotes, setCustomNotes] = useState('');
+
+  const calculateXP = (duration: number, intensity: ExerciseIntensity): number => {
+    const baseXP = Math.floor(duration / 15) * 10; // 10 XP per 15 minutes
+    const intensityMultiplier = INTENSITY_OPTIONS.find(i => i.level === intensity)?.xpMultiplier || 1;
+    return Math.floor(baseXP * intensityMultiplier);
+  };
+
+  const calculateCalories = (duration: number, intensity: ExerciseIntensity): number => {
+    const baseCalories = duration * 5; // Rough estimate: 5 calories per minute
+    const intensityMultiplier = intensity === 'light' ? 0.7 : intensity === 'moderate' ? 1 : 1.3;
+    return Math.floor(baseCalories * intensityMultiplier);
+  };
+
+  const handleQuickLog = (type: ExerciseType, duration: number, intensity: ExerciseIntensity) => {
+    const xpGained = calculateXP(duration, intensity);
+    const caloriesBurned = calculateCalories(duration, intensity);
+
+    const exercise: ExerciseLog = {
+      id: Date.now().toString(),
+      type,
+      duration,
+      intensity,
+      timestamp: new Date(),
+      xpGained,
+      caloriesBurned,
+    };
+
+    // Update user stats
+    const newXP = user.xp + xpGained;
+    const newTotalXP = user.totalXp + xpGained;
+    
+    // Check for level up
+    let newLevel = user.level;
+    let newXPToNextLevel = user.xpToNextLevel;
+    
+    if (newXP >= user.xpToNextLevel) {
+      newLevel += 1;
+      newXPToNextLevel = newLevel * 100; // Simple level progression
+      showNotification(`🎉 Level Up! You're now level ${newLevel}!`, 'success');
+      soundService.playLevelUp();
+    }
+
+    updateUser({
+      xp: newXP,
+      totalXp: newTotalXP,
+      level: newLevel,
+      xpToNextLevel: newXPToNextLevel,
+    });
+
+    // Check quest progress
+    checkQuestProgress('exercise', { type, duration, intensity });
+
+    // Show success notification
+    showNotification(`🏃‍♂️ Exercise logged! +${xpGained} XP gained!`, 'success');
+    soundService.playQuestComplete();
+
+    // Callback
+    onExerciseLogged?.(exercise);
+
+    // Close modal
+    setModalVisible(false);
+  };
+
+  const renderExerciseTypeButton = (exerciseType: typeof EXERCISE_TYPES[0]) => (
+    <TouchableOpacity
+      key={exerciseType.type}
+      style={[
+        styles.exerciseTypeButton,
+        { backgroundColor: theme.colors.surface },
+        selectedType === exerciseType.type && { borderColor: exerciseType.color, borderWidth: 3 }
+      ]}
+      onPress={() => {
+        setSelectedType(exerciseType.type as ExerciseType);
+        soundService.playButtonClick();
+      }}
+    >
+      <PixelIcon name={exerciseType.icon} size={24} color={exerciseType.color} />
+      <PixelText style={[styles.exerciseTypeLabel, { color: theme.colors.text }]}>
+        {exerciseType.label}
+      </PixelText>
+    </TouchableOpacity>
+  );
+
+  const renderDurationButton = (duration: number) => (
+    <TouchableOpacity
+      key={duration}
+      style={[
+        styles.durationButton,
+        { backgroundColor: theme.colors.surface },
+        selectedDuration === duration && { backgroundColor: theme.colors.primary }
+      ]}
+      onPress={() => {
+        setSelectedDuration(duration);
+        soundService.playButtonClick();
+      }}
+    >
+      <PixelText style={[
+        styles.durationText,
+        { color: selectedDuration === duration ? '#fff' : theme.colors.text }
+      ]}>
+        {duration}min
+      </PixelText>
+    </TouchableOpacity>
+  );
+
+  const renderIntensityButton = (intensity: typeof INTENSITY_OPTIONS[0]) => (
+    <TouchableOpacity
+      key={intensity.level}
+      style={[
+        styles.intensityButton,
+        { backgroundColor: theme.colors.surface },
+        selectedIntensity === intensity.level && { borderColor: intensity.color, borderWidth: 3 }
+      ]}
+      onPress={() => {
+        setSelectedIntensity(intensity.level as ExerciseIntensity);
+        soundService.playButtonClick();
+      }}
+    >
+      <View style={[styles.intensityIndicator, { backgroundColor: intensity.color }]} />
+      <PixelText style={[styles.intensityLabel, { color: theme.colors.text }]}>
+        {intensity.label}
+      </PixelText>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+      {/* Quick Log Header */}
+      <View style={styles.header}>
+        <PixelText style={[styles.title, { color: theme.colors.text }]}>
+          ⚡ Quick Log Exercise
+        </PixelText>
+        <PixelText style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+          Log your workout and gain XP!
+        </PixelText>
+      </View>
+
+      {/* Quick Action Buttons */}
+      <View style={styles.quickActions}>
+        <TouchableOpacity
+          style={[styles.quickButton, { backgroundColor: theme.colors.primary }]}
+          onPress={() => {
+            soundService.playButtonClick();
+            handleQuickLog('cardio', 30, 'moderate');
+          }}
+        >
+          <PixelIcon name="heart" size={20} color="#fff" />
+          <PixelText style={styles.quickButtonText}>30min Cardio</PixelText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.quickButton, { backgroundColor: theme.colors.secondary }]}
+          onPress={() => {
+            soundService.playButtonClick();
+            handleQuickLog('strength', 45, 'moderate');
+          }}
+        >
+          <PixelIcon name="fitness" size={20} color="#fff" />
+          <PixelText style={styles.quickButtonText}>45min Strength</PixelText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.quickButton, { backgroundColor: theme.colors.warning }]}
+          onPress={() => {
+            soundService.playButtonClick();
+            setModalVisible(true);
+          }}
+        >
+          <PixelIcon name="add-circle" size={20} color="#fff" />
+          <PixelText style={styles.quickButtonText}>Custom</PixelText>
+        </TouchableOpacity>
+      </View>
+
+      {/* Custom Exercise Modal */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.background }]}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <PixelText style={[styles.modalTitle, { color: theme.colors.text }]}>
+                Log Custom Exercise
+              </PixelText>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <PixelIcon name="close" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              {/* Exercise Type */}
+              <View style={styles.modalSection}>
+                <PixelText style={[styles.modalSectionTitle, { color: theme.colors.text }]}>
+                  Exercise Type
+                </PixelText>
+                <View style={styles.exerciseTypeGrid}>
+                  {EXERCISE_TYPES.map(renderExerciseTypeButton)}
+                </View>
+              </View>
+
+              {/* Duration */}
+              <View style={styles.modalSection}>
+                <PixelText style={[styles.modalSectionTitle, { color: theme.colors.text }]}>
+                  Duration
+                </PixelText>
+                <View style={styles.durationGrid}>
+                  {DURATION_OPTIONS.map(renderDurationButton)}
+                </View>
+              </View>
+
+              {/* Intensity */}
+              <View style={styles.modalSection}>
+                <PixelText style={[styles.modalSectionTitle, { color: theme.colors.text }]}>
+                  Intensity
+                </PixelText>
+                <View style={styles.intensityGrid}>
+                  {INTENSITY_OPTIONS.map(renderIntensityButton)}
+                </View>
+              </View>
+
+              {/* XP Preview */}
+              <View style={[styles.xpPreview, { backgroundColor: theme.colors.surface }]}>
+                <PixelText style={[styles.xpPreviewTitle, { color: theme.colors.text }]}>
+                  XP Preview
+                </PixelText>
+                <PixelText style={[styles.xpPreviewValue, { color: theme.colors.primary }]}>
+                  +{calculateXP(selectedDuration, selectedIntensity)} XP
+                </PixelText>
+                <PixelText style={[styles.xpPreviewCalories, { color: theme.colors.textSecondary }]}>
+                  ~{calculateCalories(selectedDuration, selectedIntensity)} calories
+                </PixelText>
+              </View>
+            </ScrollView>
+
+            {/* Modal Footer */}
+            <View style={styles.modalFooter}>
+              <RetroButton
+                title="Cancel"
+                onPress={() => setModalVisible(false)}
+                variant="secondary"
+                style={styles.modalButton}
+              />
+              <RetroButton
+                title="Log Exercise"
+                onPress={() => handleQuickLog(selectedType, selectedDuration, selectedIntensity)}
+                variant="primary"
+                style={styles.modalButton}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    margin: 15,
+    padding: 15,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    borderRadius: 0,
+  },
+  header: {
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: 'monospace',
+  },
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  quickButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  quickButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
+    fontFamily: 'monospace',
+    marginLeft: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    borderWidth: 3,
+    borderColor: '#ffffff',
+    borderRadius: 0,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: '#ffffff',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalSection: {
+    marginBottom: 25,
+  },
+  modalSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    marginBottom: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: '#ffffff',
+    paddingBottom: 5,
+  },
+  exerciseTypeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  exerciseTypeButton: {
+    width: '48%',
+    alignItems: 'center',
+    padding: 15,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: 8,
+  },
+  exerciseTypeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+    marginTop: 8,
+  },
+  durationGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  durationButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  durationText: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+  },
+  intensityGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  intensityButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 15,
+    marginHorizontal: 5,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: 8,
+  },
+  intensityIndicator: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  intensityLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+  },
+  xpPreview: {
+    padding: 15,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    alignItems: 'center',
+  },
+  xpPreviewTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    marginBottom: 10,
+  },
+  xpPreviewValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    fontFamily: 'monospace',
+    marginBottom: 5,
+  },
+  xpPreviewCalories: {
+    fontSize: 14,
+    fontFamily: 'monospace',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderTopWidth: 2,
+    borderTopColor: '#ffffff',
+  },
+  modalButton: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+}); 
