@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { ExerciseLog } from './QuickLogSection';
 import PixelText from './PixelText';
 import PixelIcon from './PixelIcon';
+import PixelArtIcon from './PixelArtIcon';
 import { RetroButton } from './RetroButton';
 import { soundService } from '../services/soundService';
 
@@ -18,14 +19,7 @@ interface ExerciseHistoryProps {
 }
 
 const getExerciseIcon = (type: ExerciseLog['type']): string => {
-  switch (type) {
-    case 'cardio': return 'heart';
-    case 'strength': return 'fitness';
-    case 'flexibility': return 'body';
-    case 'sports': return 'football';
-    case 'custom': return 'add-circle';
-    default: return 'fitness';
-  }
+  return type; // Return the type directly for PixelArtIcon
 };
 
 const getExerciseColor = (type: ExerciseLog['type']): string => {
@@ -104,8 +98,8 @@ export default function ExerciseHistory({ exercises, maxItems = 5 }: ExerciseHis
           <View key={exercise.id} style={styles.exerciseItem}>
             <View style={styles.exerciseHeader}>
               <View style={styles.exerciseType}>
-                <PixelIcon 
-                  name={getExerciseIcon(exercise.type)} 
+                <PixelArtIcon 
+                  type={exercise.type} 
                   size={20} 
                   color={getExerciseColor(exercise.type)} 
                 />

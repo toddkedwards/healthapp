@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   TouchableOpacity,
   Modal,
@@ -15,6 +16,7 @@ import { soundService } from '../services/soundService';
 import { RetroButton } from './RetroButton';
 import PixelText from './PixelText';
 import PixelIcon from './PixelIcon';
+import PixelArtIcon from './PixelArtIcon';
 
 export interface ExerciseLog {
   id: string;
@@ -35,11 +37,11 @@ interface QuickLogSectionProps {
 }
 
 const EXERCISE_TYPES = [
-  { type: 'cardio', label: 'Cardio', icon: 'heart', color: '#ff6b6b' },
-  { type: 'strength', label: 'Strength', icon: 'fitness', color: '#4ecdc4' },
-  { type: 'flexibility', label: 'Flexibility', icon: 'body', color: '#45b7d1' },
-  { type: 'sports', label: 'Sports', icon: 'football', color: '#96ceb4' },
-  { type: 'custom', label: 'Custom', icon: 'add-circle', color: '#feca57' },
+  { type: 'cardio', label: 'Cardio', color: '#ff6b6b' },
+  { type: 'strength', label: 'Strength', color: '#4ecdc4' },
+  { type: 'flexibility', label: 'Flexibility', color: '#45b7d1' },
+  { type: 'sports', label: 'Sports', color: '#96ceb4' },
+  { type: 'custom', label: 'Custom', color: '#feca57' },
 ];
 
 const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120];
@@ -160,7 +162,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
         soundService.playButtonClick();
       }}
     >
-      <PixelIcon name={exerciseType.icon} size={24} color={exerciseType.color} />
+      <PixelArtIcon type={exerciseType.type as ExerciseType} size={24} color={exerciseType.color} />
       <PixelText style={[styles.exerciseTypeLabel, { color: theme.colors.text }]}>
         {exerciseType.label}
       </PixelText>
@@ -230,7 +232,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
             handleQuickLog('cardio', 30, 'moderate');
           }}
         >
-          <PixelIcon name="heart" size={20} color="#fff" />
+          <PixelArtIcon type="cardio" size={20} color="#fff" />
           <PixelText style={styles.quickButtonText}>30min Cardio</PixelText>
         </TouchableOpacity>
 
@@ -241,7 +243,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
             handleQuickLog('strength', 45, 'moderate');
           }}
         >
-          <PixelIcon name="fitness" size={20} color="#fff" />
+          <PixelArtIcon type="strength" size={20} color="#fff" />
           <PixelText style={styles.quickButtonText}>45min Strength</PixelText>
         </TouchableOpacity>
 
@@ -252,7 +254,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
             setModalVisible(true);
           }}
         >
-          <PixelIcon name="add-circle" size={20} color="#fff" />
+          <PixelArtIcon type="custom" size={20} color="#fff" />
           <PixelText style={styles.quickButtonText}>Custom</PixelText>
         </TouchableOpacity>
       </View>
@@ -322,6 +324,23 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
                   ~{calculateCalories(selectedDuration, selectedIntensity)} calories
                 </PixelText>
               </View>
+
+              {/* Notes */}
+              <View style={styles.modalSection}>
+                <PixelText style={[styles.modalSectionTitle, { color: theme.colors.text }]}>
+                  Notes (Optional)
+                </PixelText>
+                <View style={[styles.notesInput, { backgroundColor: theme.colors.surface }]}>
+                  <TextInput
+                    style={[styles.notesText, { color: theme.colors.text }]}
+                    placeholder="Add any notes about your workout..."
+                    placeholderTextColor={theme.colors.textSecondary}
+                    multiline
+                    value={customNotes}
+                    onChangeText={setCustomNotes}
+                  />
+                </View>
+              </View>
             </ScrollView>
 
             {/* Modal Footer */}
@@ -330,13 +349,15 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
                 title="Cancel"
                 onPress={() => setModalVisible(false)}
                 variant="secondary"
-                style={styles.modalButton}
+                size="medium"
               />
               <RetroButton
                 title="Log Exercise"
-                onPress={() => handleQuickLog(selectedType, selectedDuration, selectedIntensity)}
+                onPress={() => {
+                  handleQuickLog(selectedType, selectedDuration, selectedIntensity);
+                }}
                 variant="primary"
-                style={styles.modalButton}
+                size="medium"
               />
             </View>
           </View>
@@ -370,7 +391,7 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10,
+    marginBottom: 15,
   },
   quickButton: {
     flex: 1,
@@ -378,20 +399,68 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 12,
-    borderRadius: 8,
+    marginHorizontal: 5,
     borderWidth: 2,
     borderColor: '#ffffff',
+    borderRadius: 0,
   },
   quickButtonText: {
+    color: '#fff',
     fontSize: 12,
     fontWeight: '600',
-    color: '#fff',
     fontFamily: 'monospace',
-    marginLeft: 5,
+    marginLeft: 8,
+  },
+  exerciseTypeButton: {
+    alignItems: 'center',
+    padding: 15,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: 0,
+    margin: 5,
+  },
+  exerciseTypeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+    marginTop: 8,
+  },
+  durationButton: {
+    padding: 12,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    borderRadius: 0,
+    margin: 5,
+    alignItems: 'center',
+  },
+  durationText: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+  },
+  intensityButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: 0,
+    margin: 5,
+  },
+  intensityIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  intensityLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'monospace',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -411,7 +480,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ffffff',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'monospace',
   },
@@ -422,90 +491,41 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalSection: {
-    marginBottom: 25,
+    marginBottom: 20,
   },
   modalSectionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     fontFamily: 'monospace',
-    marginBottom: 15,
-    borderBottomWidth: 2,
-    borderBottomColor: '#ffffff',
-    paddingBottom: 5,
+    marginBottom: 10,
   },
   exerciseTypeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 10,
-  },
-  exerciseTypeButton: {
-    width: '48%',
-    alignItems: 'center',
-    padding: 15,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    borderRadius: 8,
-  },
-  exerciseTypeLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'monospace',
-    marginTop: 8,
   },
   durationGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-  },
-  durationButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  durationText: {
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'monospace',
+    justifyContent: 'space-between',
   },
   intensityGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  intensityButton: {
-    flex: 1,
-    alignItems: 'center',
+  xpPreview: {
     padding: 15,
-    marginHorizontal: 5,
+    alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'transparent',
-    borderRadius: 8,
+    borderColor: '#ffffff',
+    borderRadius: 0,
+    marginBottom: 20,
   },
-  intensityIndicator: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  intensityLabel: {
+  xpPreviewTitle: {
     fontSize: 14,
     fontWeight: '600',
     fontFamily: 'monospace',
-  },
-  xpPreview: {
-    padding: 15,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#ffffff',
-    alignItems: 'center',
-  },
-  xpPreviewTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'monospace',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   xpPreviewValue: {
     fontSize: 24,
@@ -514,8 +534,20 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   xpPreviewCalories: {
+    fontSize: 12,
+    fontFamily: 'monospace',
+  },
+  notesInput: {
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    borderRadius: 0,
+    padding: 10,
+    minHeight: 80,
+  },
+  notesText: {
     fontSize: 14,
     fontFamily: 'monospace',
+    textAlignVertical: 'top',
   },
   modalFooter: {
     flexDirection: 'row',
@@ -523,9 +555,5 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopWidth: 2,
     borderTopColor: '#ffffff',
-  },
-  modalButton: {
-    flex: 1,
-    marginHorizontal: 5,
   },
 }); 
