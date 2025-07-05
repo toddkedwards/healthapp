@@ -364,6 +364,77 @@ class FirebaseServiceImpl implements FirebaseService {
     });
   }
 
+  // Generic document methods for admin service
+  async getDocument(collection: string, docId: string): Promise<any> {
+    try {
+      const docRef = doc(db, collection, docId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error getting document from ${collection}:`, error);
+      throw error;
+    }
+  }
+
+  async setDocument(collection: string, docId: string, data: any): Promise<void> {
+    try {
+      const docRef = doc(db, collection, docId);
+      await setDoc(docRef, {
+        ...data,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error(`Error setting document in ${collection}:`, error);
+      throw error;
+    }
+  }
+
+  async updateDocument(collection: string, docId: string, updates: any): Promise<void> {
+    try {
+      const docRef = doc(db, collection, docId);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error(`Error updating document in ${collection}:`, error);
+      throw error;
+    }
+  }
+
+  async deleteDocument(collection: string, docId: string): Promise<void> {
+    try {
+      const docRef = doc(db, collection, docId);
+      await updateDoc(docRef, { deletedAt: serverTimestamp() });
+    } catch (error) {
+      console.error(`Error deleting document from ${collection}:`, error);
+      throw error;
+    }
+  }
+
+  async getCollection(collection: string, filters?: Array<{ field: string; operator: string; value: any }>): Promise<any[]> {
+    try {
+      let q = query(collection(db, collection));
+      
+      if (filters) {
+        for (const filter of filters) {
+          q = query(q, where(filter.field, filter.operator as any, filter.value));
+        }
+      }
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error(`Error getting collection ${collection}:`, error);
+      throw error;
+    }
+  }
+
   // Cleanup method
   cleanup() {
     if (this.authUnsubscribe) {

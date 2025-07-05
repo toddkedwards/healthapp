@@ -24,6 +24,7 @@ import PixelArtGalleryScreen from './src/screens/PixelArtGalleryScreen';
 import AudioSettingsScreen from './src/screens/AudioSettingsScreen';
 import { HealthSettingsScreen } from './src/screens/HealthSettingsScreen';
 import AuthScreen from './src/screens/AuthScreen';
+import AdminScreen from './src/screens/AdminScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -115,6 +116,8 @@ function MainApp() {
                     iconName = focused ? 'volume-high' : 'volume-high-outline';
                   } else if (route.name === 'Health') {
                     iconName = focused ? 'fitness' : 'fitness-outline';
+                  } else if (route.name === 'Admin') {
+                    iconName = focused ? 'shield' : 'shield-outline';
                   } else {
                     iconName = 'help-outline';
                   }
@@ -146,6 +149,7 @@ function MainApp() {
               <Tab.Screen name="Health" component={HealthSettingsScreen} />
               <Tab.Screen name="Profile" component={ProfileScreen} />
               <Tab.Screen name="Character Sheet" component={CharacterSheetScreen} />
+              <Tab.Screen name="Admin" component={AdminScreen} />
                           </Tab.Navigator>
           </NavigationContainer>
           </NotificationProvider>

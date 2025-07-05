@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -29,16 +29,20 @@ import { RetroButton } from '../components/RetroButton';
 import { FadeInAnimation, SlideInAnimation } from '../components/RetroAnimations';
 import PixelIcon from '../components/PixelIcon';
 import { soundService } from '../services/soundService';
+import { adminService } from '../services/adminService';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProfileScreen() {
   const { theme, toggleTheme } = useTheme();
   const { user, fitnessData, updateUser, addWorkout } = useUser();
   const { achievements } = useQuest();
   const { showNotification } = useNotification();
+  const { user: authUser } = useAuth();
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [healthKitEnabled, setHealthKitEnabled] = useState(false);
   const [googleFitEnabled, setGoogleFitEnabled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Manual workout modal state
   const [workoutModalVisible, setWorkoutModalVisible] = useState(false);
@@ -53,6 +57,22 @@ export default function ProfileScreen() {
   const unlockedAchievements = achievements.filter(achievement => achievement.isUnlocked);
   const totalAchievements = achievements.length;
   const achievementProgress = (unlockedAchievements.length / totalAchievements) * 100;
+
+  // Check admin status
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (authUser) {
+        try {
+          const adminStatus = await adminService.checkAdminStatus(authUser.id);
+          setIsAdmin(adminStatus);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+        }
+      }
+    };
+    
+    checkAdminStatus();
+  }, [authUser]);
 
   const handleHealthKitToggle = () => {
     if (!healthKitEnabled) {
@@ -472,6 +492,25 @@ export default function ProfileScreen() {
             Built with React Native & Expo
           </Text>
         </View>
+
+        {/* Admin Panel - Only show for admin users */}
+        {isAdmin && (
+          <View style={[styles.section, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>🛠️ Admin Panel</Text>
+            <Text style={[styles.settingDesc, { color: theme.colors.textSecondary, marginBottom: 15 }]}>
+              Manage quests, shop items, bosses, and achievements
+            </Text>
+            <RetroButton
+              title="Open Admin Panel"
+              onPress={() => {
+                // Navigate to AdminScreen
+                // For now, show a notification
+                showNotification('Admin panel feature coming soon!', 'info');
+              }}
+              variant="warning"
+            />
+          </View>
+        )}
 
         {/* Character Class Picker Modal */}
         <Modal
