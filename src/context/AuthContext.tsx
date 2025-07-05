@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '../types';
-import { firebaseService } from '../services/firebaseService';
+import { enhancedAuthService } from '../services/enhancedAuthService';
 
 interface AuthContextType {
   user: User | null;
@@ -8,6 +8,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, username: string) => Promise<void>;
   signOut: () => Promise<void>;
+  getAuthStatus: () => any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,24 +30,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔐 AuthProvider: Setting up auth state listener...');
+    
     // Listen for authentication state changes
-    const unsubscribe = firebaseService.onAuthStateChange((user) => {
+    const unsubscribe = enhancedAuthService.onAuthStateChange((user) => {
+      console.log('🔄 AuthProvider: Auth state changed:', user ? `User: ${user.username}` : 'No user');
       setUser(user);
       setLoading(false);
     });
 
     return () => {
+      console.log('🧹 AuthProvider: Cleaning up...');
       unsubscribe();
-      firebaseService.cleanup();
+      enhancedAuthService.cleanup();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('🔑 AuthProvider: Starting sign in...');
       setLoading(true);
-      await firebaseService.signIn(email, password);
+      await enhancedAuthService.signIn(email, password);
+      console.log('✅ AuthProvider: Sign in completed');
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('❌ AuthProvider: Sign in error:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -55,10 +62,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signUp = async (email: string, password: string, username: string) => {
     try {
+      console.log('📝 AuthProvider: Starting sign up...');
       setLoading(true);
-      await firebaseService.signUp(email, password, username);
+      await enhancedAuthService.signUp(email, password, username);
+      console.log('✅ AuthProvider: Sign up completed');
     } catch (error) {
-      console.error('Sign up error:', error);
+      console.error('❌ AuthProvider: Sign up error:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -67,14 +76,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
+      console.log('🚪 AuthProvider: Starting sign out...');
       setLoading(true);
-      await firebaseService.signOut();
+      await enhancedAuthService.signOut();
+      console.log('✅ AuthProvider: Sign out completed');
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('❌ AuthProvider: Sign out error:', error);
       throw error;
     } finally {
       setLoading(false);
     }
+  };
+
+  const getAuthStatus = () => {
+    return enhancedAuthService.getAuthStatus();
   };
 
   const value = {
@@ -83,6 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signIn,
     signUp,
     signOut,
+    getAuthStatus,
   };
 
   return (
