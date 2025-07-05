@@ -17,7 +17,7 @@ import { RetroButton } from '../components/RetroButton';
 import RetroProfileBanner from '../components/RetroProfileBanner';
 import PixelBackground from '../components/PixelBackground';
 import PixelText from '../components/PixelText';
-import PixelIcon from '../components/PixelIcon';
+import UnifiedIcon from '../components/UnifiedIcon';
 import { soundService } from '../services/soundService';
 import { mockQuests } from '../data/mockData';
 import { HealthDashboard } from '../components/HealthDashboard';
@@ -171,7 +171,9 @@ export default function DashboardScreen() {
           </View>
           {recentAchievements.map(achievement => (
             <View key={achievement.id} style={styles.achievementItem}>
-              <PixelIcon name={achievement.icon} size={24} />
+              <View style={styles.achievementIcon}>
+                <UnifiedIcon name={achievement.icon} size={24} />
+              </View>
               <View style={styles.achievementInfo}>
                 <PixelText style={[styles.achievementTitle, { color: theme.colors.text }]}>
                   {achievement.title}

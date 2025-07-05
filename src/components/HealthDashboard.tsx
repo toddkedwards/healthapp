@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import PixelText from './PixelText';
-import PixelIcon from './PixelIcon';
+import UnifiedIcon from './UnifiedIcon';
 import { ProgressBar } from './ProgressBar';
 import { RetroButton } from './RetroButton';
 import { HealthMetrics, HealthData, HealthWorkout } from '../services/healthDataService';
@@ -113,7 +113,9 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({
   ) => (
     <View style={[styles.metricCard, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.metricHeader}>
-        <PixelIcon name={icon} size={24} color={color} />
+        <View style={styles.iconContainer}>
+          <UnifiedIcon name={icon} size={24} color={color} />
+        </View>
         <PixelText style={[styles.metricTitle, { color: theme.colors.text }]}>
           {title}
         </PixelText>
@@ -138,7 +140,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({
   const renderWorkoutCard = (workout: HealthWorkout) => (
     <View key={workout.id} style={[styles.workoutCard, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.workoutHeader}>
-        <PixelIcon 
+        <UnifiedIcon 
           name={getWorkoutIcon(workout.type)} 
           size={20} 
           color={theme.colors.primary} 
@@ -242,7 +244,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({
             onPress={handleSync}
             disabled={isLoading}
           >
-            <PixelIcon name="refresh" size={20} color="#ffffff" />
+            <UnifiedIcon name="refresh" size={20} color="#ffffff" />
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -327,7 +329,9 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({
           <View style={styles.healthStats}>
             {healthData.heartRate && (
               <View style={[styles.healthStat, { backgroundColor: theme.colors.surface }]}>
-                <PixelIcon name="heart" size={20} color={theme.colors.error} />
+                <View style={styles.iconContainer}>
+                  <UnifiedIcon name="heart" size={20} color={theme.colors.error} />
+                </View>
                 <PixelText style={[styles.healthStatValue, { color: theme.colors.error }]}>
                   {healthData.heartRate}
                 </PixelText>
@@ -338,7 +342,9 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({
             )}
             {healthData.sleepHours && (
               <View style={[styles.healthStat, { backgroundColor: theme.colors.surface }]}>
-                <PixelIcon name="moon" size={20} color={theme.colors.secondary} />
+                <View style={styles.iconContainer}>
+                  <UnifiedIcon name="moon" size={20} color={theme.colors.secondary} />
+                </View>
                 <PixelText style={[styles.healthStatValue, { color: theme.colors.secondary }]}>
                   {healthData.sleepHours.toFixed(1)}
                 </PixelText>
@@ -374,7 +380,7 @@ export const HealthDashboard: React.FC<HealthDashboardProps> = ({
       {/* Connection Status */}
       <View style={[styles.connectionStatus, { backgroundColor: theme.colors.surface }]}>
         <View style={styles.connectionInfo}>
-          <PixelIcon 
+          <UnifiedIcon 
             name={healthDataService.isHealthDataAvailable() ? 'wifi' : 'wifi-off'} 
             size={16} 
             color={healthDataService.isHealthDataAvailable() ? theme.colors.success : theme.colors.error} 
@@ -602,5 +608,8 @@ const styles = StyleSheet.create({
   deviceInfo: {
     fontSize: 10,
     fontFamily: 'monospace',
+  },
+  iconContainer: {
+    marginRight: 8,
   },
 }); 

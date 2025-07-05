@@ -216,6 +216,27 @@ const PIXEL_ICONS: { [key: string]: string } = {
   calories_burned: '🔥',
   distance_walked: '🗺️',
   active_minutes: '⏱️',
+
+  // MISSING ICONS - ADDED FOR CONSISTENCY
+  lock: '🔒',
+  question: '❓',
+  refresh: '🔄',
+  flash: '⚡',
+  info: 'ℹ️',
+  bug: '🐛',
+  fitness: '🏋️',
+  
+  // Avatar icons for character selection
+  mage_m: '🧙‍♂️',
+  mage_f: '🧙‍♀️',
+  warrior_m: '⚔️',
+  warrior_f: '⚔️',
+  rogue_m: '🗡️',
+  rogue_f: '🗡️',
+  archer_m: '🏹',
+  archer_f: '🏹',
+  healer_m: '⛪',
+  healer_f: '⛪',
 };
 
 export default function PixelIcon({

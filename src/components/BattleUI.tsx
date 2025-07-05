@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Animated,
   Dimensions,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useUser } from '../context/UserContext';
+import PixelBackground from './PixelBackground';
 import PixelText from './PixelText';
-import PixelIcon from './PixelIcon';
+import UnifiedIcon from './UnifiedIcon';
 import PixelArtSpriteComponent from './PixelArtSprite';
 import { ProgressBar } from './ProgressBar';
 import { RetroButton } from './RetroButton';
@@ -108,7 +110,7 @@ export const BattleUI: React.FC<BattleUIProps> = ({
   const renderEnergyBar = (current: number, max: number, label: string) => (
     <View style={styles.energyBarContainer}>
       <View style={styles.energyBarHeader}>
-        <PixelIcon name="flash" size={16} color={theme.colors.energy} />
+        <UnifiedIcon name="flash" size={16} color={theme.colors.energy} />
         <PixelText style={[styles.energyBarLabel, { color: theme.colors.textSecondary }]}>
           {label}
         </PixelText>
@@ -136,7 +138,7 @@ export const BattleUI: React.FC<BattleUIProps> = ({
             key={`${effect.id}-${index}`}
             style={[styles.statusEffectItem, { backgroundColor: theme.colors.surface }]}
           >
-            <PixelText style={styles.statusEffectIcon}>{effect.icon}</PixelText>
+            <UnifiedIcon name={effect.icon} size={16} color={theme.colors.text} />
             <PixelText style={[styles.statusEffectName, { color: theme.colors.text }]}>
               {effect.name}
             </PixelText>
@@ -201,7 +203,7 @@ export const BattleUI: React.FC<BattleUIProps> = ({
         disabled={!canUse}
         activeOpacity={0.8}
       >
-        <PixelIcon name={ability.icon} size={24} color={canUse ? '#fff' : theme.colors.text} />
+        <UnifiedIcon name={ability.icon} size={24} color={canUse ? '#fff' : theme.colors.text} />
         <View style={styles.abilityInfo}>
           <PixelText style={[styles.abilityName, { color: canUse ? '#fff' : theme.colors.text }]}>
             {ability.name}

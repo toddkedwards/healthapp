@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text, Animated } from 'react-native';
-import PixelIcon from './PixelIcon';
+import UnifiedIcon from './UnifiedIcon';
 import { soundService } from '../services/soundService';
 
 const AVATARS = [
@@ -46,7 +46,7 @@ const PixelAvatarPicker: React.FC<PixelAvatarPickerProps> = ({ selected, onSelec
             activeOpacity={0.8}
           >
             <Animated.View style={{ transform: [{ scale: anims[idx] }] }}>
-              <PixelIcon name={avatar.key} size={48} />
+              <UnifiedIcon name={avatar.key} size={48} />
             </Animated.View>
           </TouchableOpacity>
           <Text style={[styles.label, selected === avatar.key && styles.selectedLabel]}>{avatar.label}</Text>
