@@ -18,18 +18,10 @@ import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 // Screens
 import DashboardScreen from './src/screens/DashboardScreen';
-import QuestsScreen from './src/screens/QuestsScreen';
 import BossBattlesScreen from './src/screens/BossBattlesScreen';
 import ShopScreen from './src/screens/ShopScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import CharacterSheetScreen from './src/screens/CharacterSheetScreen';
-import AchievementsScreen from './src/screens/AchievementsScreen';
-import PixelArtGalleryScreen from './src/screens/PixelArtGalleryScreen';
-import AudioSettingsScreen from './src/screens/AudioSettingsScreen';
-import { HealthSettingsScreen } from './src/screens/HealthSettingsScreen';
-import NotificationSettingsScreen from './src/screens/NotificationSettingsScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import AuthScreen from './src/screens/AuthScreen';
-import AdminScreen from './src/screens/AdminScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -149,22 +141,10 @@ function MainApp() {
                       iconName = focused ? 'flash' : 'flash-outline';
                     } else if (route.name === 'Shop') {
                       iconName = focused ? 'storefront' : 'storefront-outline';
-                    } else if (route.name === 'Profile') {
-                      iconName = focused ? 'person' : 'person-outline';
-                    } else if (route.name === 'Character Sheet') {
-                      iconName = focused ? 'document-text' : 'document-text-outline';
-                    } else if (route.name === 'Achievements') {
-                      iconName = focused ? 'trophy' : 'trophy-outline';
-                    } else if (route.name === 'Pixel Art') {
-                      iconName = focused ? 'images' : 'images-outline';
-                    } else if (route.name === 'Audio') {
-                      iconName = focused ? 'volume-high' : 'volume-high-outline';
                     } else if (route.name === 'Health') {
                       iconName = focused ? 'fitness' : 'fitness-outline';
-                    } else if (route.name === 'Admin') {
-                      iconName = focused ? 'shield' : 'shield-outline';
-                    } else if (route.name === 'Notifications') {
-                      iconName = focused ? 'notifications' : 'notifications-outline';
+                    } else if (route.name === 'Settings') {
+                      iconName = focused ? 'settings' : 'settings-outline';
                     } else {
                       iconName = 'help-outline';
                     }
@@ -187,17 +167,9 @@ function MainApp() {
                 })}
               >
                 <Tab.Screen name="Dashboard" component={DashboardScreen} />
-                <Tab.Screen name="Quests" component={QuestsScreen} />
                 <Tab.Screen name="Boss Battles" component={BossBattlesScreen} />
                 <Tab.Screen name="Shop" component={ShopScreen} />
-                <Tab.Screen name="Achievements" component={AchievementsScreen} />
-                <Tab.Screen name="Pixel Art" component={PixelArtGalleryScreen} />
-                <Tab.Screen name="Audio" component={AudioSettingsScreen} />
-                <Tab.Screen name="Health" component={HealthSettingsScreen} />
-                <Tab.Screen name="Notifications" component={NotificationSettingsScreen} />
-                <Tab.Screen name="Profile" component={ProfileScreen} />
-                <Tab.Screen name="Character Sheet" component={CharacterSheetScreen} />
-                <Tab.Screen name="Admin" component={AdminScreen} />
+                <Tab.Screen name="Settings" component={SettingsScreen} />
               </Tab.Navigator>
             </NavigationContainer>
             </NotificationProvider>
