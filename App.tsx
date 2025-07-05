@@ -48,7 +48,15 @@ function MainApp() {
       });
     }, 200);
 
-    return () => clearInterval(loadingInterval);
+    // Fallback timeout to prevent infinite loading
+    const fallbackTimeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 10000); // 10 seconds
+
+    return () => {
+      clearInterval(loadingInterval);
+      clearTimeout(fallbackTimeout);
+    };
   }, []);
 
   if (isLoading || loading) {
@@ -65,7 +73,13 @@ function MainApp() {
   }
 
   if (!user) {
-    return <AuthScreen />;
+    return (
+      <ThemeProvider>
+        <NotificationProvider>
+          <AuthScreen />
+        </NotificationProvider>
+      </ThemeProvider>
+    );
   }
 
   return (

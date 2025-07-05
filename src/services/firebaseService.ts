@@ -19,6 +19,8 @@ import {
   limit,
   addDoc,
   serverTimestamp,
+  getDocs,
+  increment,
 } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { User, Quest, Achievement, Boss, ShopItem } from '../types';
@@ -157,10 +159,16 @@ class FirebaseServiceImpl implements FirebaseService {
 
   onAuthStateChange(callback: (user: User | null) => void): () => void {
     return onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userProfile = await this.getUserProfile(firebaseUser.uid);
-        callback(userProfile);
-      } else {
+      try {
+        if (firebaseUser) {
+          const userProfile = await this.getUserProfile(firebaseUser.uid);
+          callback(userProfile);
+        } else {
+          callback(null);
+        }
+      } catch (error) {
+        console.error('Error in auth state change:', error);
+        // If there's an error getting user profile, still call callback with null
         callback(null);
       }
     });
@@ -169,11 +177,13 @@ class FirebaseServiceImpl implements FirebaseService {
   // User Data methods
   async createUserProfile(userId: string, userData: Partial<User>): Promise<void> {
     try {
-      await setDoc(doc(db, 'users', userId), {
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, {
         ...userData,
         createdAt: serverTimestamp(),
         lastActive: serverTimestamp(),
       });
+      console.log('User profile created successfully');
     } catch (error) {
       console.error('Error creating user profile:', error);
       throw error;
@@ -182,34 +192,14 @@ class FirebaseServiceImpl implements FirebaseService {
 
   async getUserProfile(userId: string): Promise<User | null> {
     try {
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data() as User;
         return {
+          ...userData,
           id: userId,
-          name: data.name || data.username,
-          username: data.username,
-          email: data.email,
-          level: data.level || 1,
-          xp: data.xp || 0,
-          xpToNextLevel: data.xpToNextLevel || 100,
-          totalXp: data.totalXp || 0,
-          health: data.health || 100,
-          maxHealth: data.maxHealth || 100,
-          energy: data.energy || 50,
-          maxEnergy: data.maxEnergy || 50,
-          strength: data.strength || 10,
-          agility: data.agility || 10,
-          intelligence: data.intelligence || 10,
-          stamina: data.stamina || 10,
-          defense: data.defense || 10,
-          coins: data.coins || 50,
-          characterClass: data.characterClass || 'warrior',
-          unlockedAbilities: data.unlockedAbilities || [],
-          achievements: data.achievements || [],
-          equipment: data.equipment || [],
-          createdAt: data.createdAt?.toDate() || new Date(),
-          lastActive: data.lastActive?.toDate() || new Date(),
         };
       }
       return null;
@@ -221,7 +211,8 @@ class FirebaseServiceImpl implements FirebaseService {
 
   async updateUserProfile(userId: string, updates: Partial<User>): Promise<void> {
     try {
-      await updateDoc(doc(db, 'users', userId), {
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
         ...updates,
         lastActive: serverTimestamp(),
       });
@@ -239,15 +230,9 @@ class FirebaseServiceImpl implements FirebaseService {
   // Quest System methods
   async getUserQuests(userId: string): Promise<Quest[]> {
     try {
-      const questsQuery = query(
-        collection(db, 'userQuests'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      // For now, return mock quests until we implement the full quest system
-      // TODO: Implement actual quest retrieval from Firestore
-      return [];
+      const questsRef = collection(db, 'users', userId, 'quests');
+      const questsSnap = await getDocs(questsRef);
+      return questsSnap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Quest));
     } catch (error) {
       console.error('Error getting user quests:', error);
       return [];
@@ -256,10 +241,8 @@ class FirebaseServiceImpl implements FirebaseService {
 
   async updateQuestProgress(userId: string, questId: string, progress: number): Promise<void> {
     try {
-      await updateDoc(doc(db, 'userQuests', `${userId}_${questId}`), {
-        progress,
-        updatedAt: serverTimestamp(),
-      });
+      const questRef = doc(db, 'users', userId, 'quests', questId);
+      await updateDoc(questRef, { progress });
     } catch (error) {
       console.error('Error updating quest progress:', error);
       throw error;
@@ -268,9 +251,10 @@ class FirebaseServiceImpl implements FirebaseService {
 
   async completeQuest(userId: string, questId: string): Promise<void> {
     try {
-      await updateDoc(doc(db, 'userQuests', `${userId}_${questId}`), {
-        completed: true,
-        completedAt: serverTimestamp(),
+      const questRef = doc(db, 'users', userId, 'quests', questId);
+      await updateDoc(questRef, { 
+        completed: true, 
+        completedAt: serverTimestamp() 
       });
     } catch (error) {
       console.error('Error completing quest:', error);
@@ -281,14 +265,9 @@ class FirebaseServiceImpl implements FirebaseService {
   // Achievement methods
   async getUserAchievements(userId: string): Promise<Achievement[]> {
     try {
-      const achievementsQuery = query(
-        collection(db, 'userAchievements'),
-        where('userId', '==', userId)
-      );
-      
-      // For now, return mock achievements
-      // TODO: Implement actual achievement retrieval from Firestore
-      return [];
+      const achievementsRef = collection(db, 'users', userId, 'achievements');
+      const achievementsSnap = await getDocs(achievementsRef);
+      return achievementsSnap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Achievement));
     } catch (error) {
       console.error('Error getting user achievements:', error);
       return [];
@@ -297,10 +276,10 @@ class FirebaseServiceImpl implements FirebaseService {
 
   async unlockAchievement(userId: string, achievementId: string): Promise<void> {
     try {
-      await addDoc(collection(db, 'userAchievements'), {
-        userId,
-        achievementId,
+      const achievementRef = doc(db, 'users', userId, 'achievements', achievementId);
+      await setDoc(achievementRef, {
         unlockedAt: serverTimestamp(),
+        unlocked: true
       });
     } catch (error) {
       console.error('Error unlocking achievement:', error);
@@ -311,16 +290,9 @@ class FirebaseServiceImpl implements FirebaseService {
   // Boss Battle methods
   async getBossBattles(userId: string): Promise<Boss[]> {
     try {
-      const battlesQuery = query(
-        collection(db, 'bossBattles'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
-        limit(10)
-      );
-      
-      // For now, return mock battles
-      // TODO: Implement actual boss battle retrieval from Firestore
-      return [];
+      const bossesRef = collection(db, 'users', userId, 'bossBattles');
+      const bossesSnap = await getDocs(bossesRef);
+      return bossesSnap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Boss));
     } catch (error) {
       console.error('Error getting boss battles:', error);
       return [];
@@ -329,10 +301,10 @@ class FirebaseServiceImpl implements FirebaseService {
 
   async saveBossBattle(userId: string, battle: Boss): Promise<void> {
     try {
-      await addDoc(collection(db, 'bossBattles'), {
-        userId,
+      const battleRef = doc(db, 'users', userId, 'bossBattles', battle.id);
+      await setDoc(battleRef, {
         ...battle,
-        createdAt: serverTimestamp(),
+        savedAt: serverTimestamp()
       });
     } catch (error) {
       console.error('Error saving boss battle:', error);
@@ -343,14 +315,9 @@ class FirebaseServiceImpl implements FirebaseService {
   // Shop methods
   async getUserInventory(userId: string): Promise<ShopItem[]> {
     try {
-      const inventoryQuery = query(
-        collection(db, 'userInventory'),
-        where('userId', '==', userId)
-      );
-      
-      // For now, return mock inventory
-      // TODO: Implement actual inventory retrieval from Firestore
-      return [];
+      const inventoryRef = collection(db, 'users', userId, 'inventory');
+      const inventorySnap = await getDocs(inventoryRef);
+      return inventorySnap.docs.map(doc => ({ ...doc.data(), id: doc.id } as ShopItem));
     } catch (error) {
       console.error('Error getting user inventory:', error);
       return [];
@@ -360,15 +327,17 @@ class FirebaseServiceImpl implements FirebaseService {
   async purchaseItem(userId: string, itemId: string, cost: number): Promise<void> {
     try {
       // Add item to inventory
-      await addDoc(collection(db, 'userInventory'), {
-        userId,
+      const inventoryRef = collection(db, 'users', userId, 'inventory');
+      await addDoc(inventoryRef, {
         itemId,
         purchasedAt: serverTimestamp(),
+        cost
       });
       
-      // Deduct coins from user
-      await this.updateUserProfile(userId, {
-        coins: (this.currentUser?.coins || 0) - cost,
+      // Deduct coins from user profile
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
+        coins: increment(-cost)
       });
     } catch (error) {
       console.error('Error purchasing item:', error);
@@ -378,53 +347,19 @@ class FirebaseServiceImpl implements FirebaseService {
 
   // Real-time subscription methods
   subscribeToUserData(userId: string, callback: (user: User) => void): () => void {
-    return onSnapshot(doc(db, 'users', userId), (doc) => {
+    const userRef = doc(db, 'users', userId);
+    return onSnapshot(userRef, (doc) => {
       if (doc.exists()) {
-        const data = doc.data();
-                 const user: User = {
-           id: userId,
-           name: data.name || data.username,
-           username: data.username,
-           email: data.email,
-           level: data.level || 1,
-           xp: data.xp || 0,
-           xpToNextLevel: data.xpToNextLevel || 100,
-           totalXp: data.totalXp || 0,
-           health: data.health || 100,
-           maxHealth: data.maxHealth || 100,
-           energy: data.energy || 50,
-           maxEnergy: data.maxEnergy || 50,
-           strength: data.strength || 10,
-           agility: data.agility || 10,
-           intelligence: data.intelligence || 10,
-           stamina: data.stamina || 10,
-           defense: data.defense || 10,
-           coins: data.coins || 50,
-           characterClass: data.characterClass || 'warrior',
-           unlockedAbilities: data.unlockedAbilities || [],
-           achievements: data.achievements || [],
-           equipment: data.equipment || [],
-           createdAt: data.createdAt?.toDate() || new Date(),
-           lastActive: data.lastActive?.toDate() || new Date(),
-         };
-        callback(user);
+        const userData = doc.data() as User;
+        callback({ ...userData, id: userId });
       }
     });
   }
 
   subscribeToQuests(userId: string, callback: (quests: Quest[]) => void): () => void {
-    const questsQuery = query(
-      collection(db, 'userQuests'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
-    
-    return onSnapshot(questsQuery, (snapshot) => {
-      const quests: Quest[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        // TODO: Convert Firestore data to Quest objects
-      });
+    const questsRef = collection(db, 'users', userId, 'quests');
+    return onSnapshot(questsRef, (snapshot) => {
+      const quests = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Quest));
       callback(quests);
     });
   }
