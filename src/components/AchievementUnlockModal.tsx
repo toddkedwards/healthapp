@@ -13,7 +13,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useNotification } from '../context/NotificationContext';
 import { Achievement } from '../types';
 import { soundService } from '../services/soundService';
-import UnifiedIcon from './UnifiedIcon';
+import PixelIcon from './PixelIcon';
 
 const { width, height } = Dimensions.get('window');
 
@@ -185,7 +185,7 @@ export default function AchievementUnlockModal({
         >
           {/* Achievement icon */}
           <View style={[styles.iconContainer, { borderColor: rarity.color }]}>
-            <UnifiedIcon name={achievement.icon} size={40} color={rarity.color} />
+            <PixelIcon name={achievement.icon} size={40} color={rarity.color} />
             <View style={[styles.rarityBadge, { backgroundColor: rarity.color }]}>
               <Text style={styles.rarityText}>{rarity.label}</Text>
             </View>
@@ -202,7 +202,7 @@ export default function AchievementUnlockModal({
             
             {/* Category indicator */}
             <View style={styles.categoryContainer}>
-              <UnifiedIcon 
+              <PixelIcon 
                 name={
                   achievement.category === 'steps' ? 'steps' :
                   achievement.category === 'workout' ? 'workout' :

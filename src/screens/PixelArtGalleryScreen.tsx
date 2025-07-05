@@ -11,7 +11,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
 import PixelBackground from '../components/PixelBackground';
 import PixelText from '../components/PixelText';
-import UnifiedIcon from '../components/UnifiedIcon';
+import PixelIcon from '../components/PixelIcon';
 import PixelArtSpriteComponent from '../components/PixelArtSprite';
 import { RetroButton } from '../components/RetroButton';
 import { FadeInAnimation, SlideInAnimation } from '../components/RetroAnimations';
@@ -181,7 +181,7 @@ export default function PixelArtGalleryScreen() {
           />
           {!isUnlocked && (
             <View style={styles.lockOverlay}>
-              <UnifiedIcon name="lock" size={20} color={theme.colors.textSecondary} />
+              <PixelIcon name="lock" size={20} color={theme.colors.textSecondary} />
             </View>
           )}
         </View>
@@ -284,7 +284,7 @@ export default function PixelArtGalleryScreen() {
             </PixelText>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
               {renderFilterButton('All', 'all', 'category')}
-              {renderFilterButton('Characters', 'character', 'category', '��')}
+              {renderFilterButton('Characters', 'character', 'category', '👤')}
               {renderFilterButton('Bosses', 'boss', 'category', '👹')}
               {renderFilterButton('Enemies', 'enemy', 'category', '👺')}
               {renderFilterButton('Equipment', 'equipment', 'category', '⚔️')}
@@ -318,7 +318,7 @@ export default function PixelArtGalleryScreen() {
           
           {filteredSprites.length === 0 ? (
             <View style={styles.emptyState}>
-              <UnifiedIcon name="question" size={48} color={theme.colors.textSecondary} />
+              <PixelIcon name="question" size={48} color={theme.colors.textSecondary} />
               <PixelText style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
                 No sprites match your filters
               </PixelText>

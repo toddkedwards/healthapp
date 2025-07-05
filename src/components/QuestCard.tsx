@@ -7,7 +7,7 @@ import { useUser } from '../context/UserContext';
 import { useNotification } from '../context/NotificationContext';
 import { soundService } from '../services/soundService';
 import { notificationService } from '../services/notificationService';
-import UnifiedIcon from './UnifiedIcon';
+import PixelIcon from './PixelIcon';
 import { RetroButton } from './RetroButton';
 
 interface QuestCardProps {
@@ -140,7 +140,7 @@ export const QuestCard: React.FC<QuestCardProps> = ({ quest, style, onPress }) =
     <View style={[styles.container, style, isCompleted && styles.completed]}>
       <View style={styles.header}>
         <View style={[styles.iconContainer, { backgroundColor: getQuestColor() + '20' }]}>
-          <UnifiedIcon name={getQuestIcon()} size={20} color={getQuestColor()} />
+          <PixelIcon name={getQuestIcon()} size={20} color={getQuestColor()} />
         </View>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{quest.title}</Text>
@@ -148,7 +148,7 @@ export const QuestCard: React.FC<QuestCardProps> = ({ quest, style, onPress }) =
         </View>
         {isCompleted && (
           <View style={styles.completedBadge}>
-            <UnifiedIcon name="star" size={20} color="#4ecdc4" />
+            <PixelIcon name="star" size={20} color="#4ecdc4" />
           </View>
         )}
       </View>

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import PixelText from '../components/PixelText';
-import UnifiedIcon from '../components/UnifiedIcon';
+import PixelIcon from '../components/PixelIcon';
 import { RetroButton } from '../components/RetroButton';
 import { healthDataService } from '../services/healthDataService';
 import { soundService } from '../services/soundService';
@@ -216,7 +216,7 @@ export const HealthSettingsScreen: React.FC = () => {
   ) => (
     <View style={[styles.settingItem, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.settingLeft}>
-        <UnifiedIcon name={icon} size={24} color={theme.colors.primary} />
+        <PixelIcon name={icon} size={24} color={theme.colors.primary} />
         <View style={styles.settingText}>
           <PixelText style={[styles.settingTitle, { color: theme.colors.text }]}>
             {title}
@@ -282,7 +282,7 @@ export const HealthSettingsScreen: React.FC = () => {
             'device',
             'Device',
             `${deviceInfo.platform} • ${deviceInfo.model}`,
-            <UnifiedIcon name="info" size={16} color={theme.colors.textSecondary} />
+            <PixelIcon name="info" size={16} color={theme.colors.textSecondary} />
           )}
         </View>
 
@@ -338,42 +338,42 @@ export const HealthSettingsScreen: React.FC = () => {
             'footsteps',
             'Step Count',
             'Daily step tracking',
-            <UnifiedIcon name="check" size={16} color={theme.colors.success} />
+            <PixelIcon name="check" size={16} color={theme.colors.success} />
           )}
 
           {renderSettingItem(
             'flame',
             'Calories',
             'Calories burned',
-            <UnifiedIcon name="check" size={16} color={theme.colors.success} />
+            <PixelIcon name="check" size={16} color={theme.colors.success} />
           )}
 
           {renderSettingItem(
             'map',
             'Distance',
             'Walking/running distance',
-            <UnifiedIcon name="check" size={16} color={theme.colors.success} />
+            <PixelIcon name="check" size={16} color={theme.colors.success} />
           )}
 
           {renderSettingItem(
             'heart',
             'Heart Rate',
             'Heart rate monitoring',
-            <UnifiedIcon name="check" size={16} color={theme.colors.success} />
+            <PixelIcon name="check" size={16} color={theme.colors.success} />
           )}
 
           {renderSettingItem(
             'moon',
             'Sleep',
             'Sleep tracking',
-            <UnifiedIcon name="check" size={16} color={theme.colors.success} />
+            <PixelIcon name="check" size={16} color={theme.colors.success} />
           )}
 
           {renderSettingItem(
             'workout',
             'Workouts',
             'Exercise sessions',
-            <UnifiedIcon name="check" size={16} color={theme.colors.success} />
+            <PixelIcon name="check" size={16} color={theme.colors.success} />
           )}
         </View>
 
@@ -427,7 +427,7 @@ export const HealthSettingsScreen: React.FC = () => {
 
         {/* Debug Info */}
         <View style={[styles.infoSection, { backgroundColor: theme.colors.surface }]}>
-          <UnifiedIcon name="bug" size={20} color={theme.colors.warning} />
+          <PixelIcon name="bug" size={20} color={theme.colors.warning} />
           <View style={styles.infoContent}>
             <PixelText style={[styles.infoTitle, { color: theme.colors.text }]}>
               Debug Info
@@ -443,7 +443,7 @@ export const HealthSettingsScreen: React.FC = () => {
 
         {/* Info */}
         <View style={[styles.infoSection, { backgroundColor: theme.colors.surface }]}>
-          <UnifiedIcon name="info" size={20} color={theme.colors.primary} />
+          <PixelIcon name="info" size={20} color={theme.colors.primary} />
           <View style={styles.infoContent}>
             <PixelText style={[styles.infoTitle, { color: theme.colors.text }]}>
               About Health Data

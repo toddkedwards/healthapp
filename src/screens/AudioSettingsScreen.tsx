@@ -10,7 +10,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import PixelBackground from '../components/PixelBackground';
 import PixelText from '../components/PixelText';
-import UnifiedIcon from '../components/UnifiedIcon';
+import PixelIcon from '../components/PixelIcon';
 import { RetroButton } from '../components/RetroButton';
 import { FadeInAnimation, SlideInAnimation } from '../components/RetroAnimations';
 import { useAudio } from '../context/AudioContext';
@@ -117,7 +117,9 @@ export default function AudioSettingsScreen() {
   ) => (
     <View style={[styles.settingItem, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.settingHeader}>
-        <UnifiedIcon name={icon} size={24} color={theme.colors.text} />
+        <View style={styles.iconContainer}>
+          <PixelIcon name={icon} size={24} color={theme.colors.text} />
+        </View>
         <PixelText style={[styles.settingTitle, { color: theme.colors.text }]}>
           {title}
         </PixelText>
@@ -157,7 +159,9 @@ export default function AudioSettingsScreen() {
   ) => (
     <View style={[styles.settingItem, { backgroundColor: theme.colors.surface }]}>
       <View style={styles.settingHeader}>
-        <UnifiedIcon name={icon} size={24} color={theme.colors.text} />
+        <View style={styles.iconContainer}>
+          <PixelIcon name={icon} size={24} color={theme.colors.text} />
+        </View>
         <View style={styles.settingTextContainer}>
           <PixelText style={[styles.settingTitle, { color: theme.colors.text }]}>
             {title}
@@ -185,7 +189,9 @@ export default function AudioSettingsScreen() {
       onPress={() => playSoundPreview(soundType)}
       activeOpacity={0.8}
     >
-      <UnifiedIcon name={icon} size={24} color={theme.colors.text} />
+      <View style={styles.iconContainer}>
+        <PixelIcon name={icon} size={24} color={theme.colors.text} />
+      </View>
       <PixelText style={[styles.soundPreviewTitle, { color: theme.colors.text }]}>
         {title}
       </PixelText>
@@ -433,5 +439,8 @@ const styles = StyleSheet.create({
   resetSection: {
     margin: 16,
     paddingBottom: 20,
+  },
+  iconContainer: {
+    marginRight: 12,
   },
 }); 

@@ -15,7 +15,8 @@ import { useNotification } from '../context/NotificationContext';
 import { soundService } from '../services/soundService';
 import { RetroButton } from './RetroButton';
 import PixelText from './PixelText';
-import UnifiedIcon from './UnifiedIcon';
+import PixelArtIcon from './PixelArtIcon';
+import PixelIcon from './PixelIcon';
 
 export interface ExerciseLog {
   id: string;
@@ -162,7 +163,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
       }}
     >
       <View style={styles.iconContainer}>
-        <UnifiedIcon type={exerciseType.type as ExerciseType} size={32} color={exerciseType.color} />
+        <PixelArtIcon type={exerciseType.type as ExerciseType} size={32} color={exerciseType.color} />
       </View>
       <PixelText style={[styles.exerciseTypeLabel, { color: theme.colors.text }]}>
         {exerciseType.label}
@@ -234,7 +235,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
           }}
         >
           <View style={styles.iconContainer}>
-            <UnifiedIcon type="cardio" size={32} color="#fff" />
+            <PixelIcon type="cardio" size={32} color="#fff" />
           </View>
           <PixelText style={styles.quickButtonText}>30min Cardio</PixelText>
         </TouchableOpacity>
@@ -247,7 +248,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
           }}
         >
           <View style={styles.iconContainer}>
-            <UnifiedIcon type="strength" size={32} color="#fff" />
+            <PixelIcon type="strength" size={32} color="#fff" />
           </View>
           <PixelText style={styles.quickButtonText}>45min Strength</PixelText>
         </TouchableOpacity>
@@ -260,7 +261,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
           }}
         >
           <View style={styles.iconContainer}>
-            <UnifiedIcon type="custom" size={32} color="#fff" />
+            <PixelIcon type="custom" size={32} color="#fff" />
           </View>
           <PixelText style={styles.quickButtonText}>Custom</PixelText>
         </TouchableOpacity>
@@ -284,7 +285,7 @@ export default function QuickLogSection({ onExerciseLogged }: QuickLogSectionPro
                 onPress={() => setModalVisible(false)}
                 style={styles.closeButton}
               >
-                <UnifiedIcon name="close" size={24} color={theme.colors.text} />
+                <PixelIcon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import UnifiedIcon from './UnifiedIcon';
+import PixelIcon from './PixelIcon';
 
 interface StatCardProps {
   title: string;
@@ -31,7 +31,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <View style={[styles.container, getSizeStyles()]}>
       <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
-        <UnifiedIcon name={icon} size={20} color={color} />
+        <PixelIcon name={icon} size={20} color={color} />
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>

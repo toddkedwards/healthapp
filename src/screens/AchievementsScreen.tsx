@@ -12,7 +12,7 @@ import { useQuest } from '../context/QuestContext';
 import { useUser } from '../context/UserContext';
 import PixelBackground from '../components/PixelBackground';
 import PixelText from '../components/PixelText';
-import UnifiedIcon from '../components/UnifiedIcon';
+import PixelIcon from '../components/PixelIcon';
 import { RetroButton } from '../components/RetroButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { FadeInAnimation, SlideInAnimation } from '../components/RetroAnimations';
@@ -110,7 +110,7 @@ export default function AchievementsScreen() {
         onPress={() => handleFilterChange(value, type)}
         activeOpacity={0.8}
       >
-        {icon && <UnifiedIcon name={icon} size={16} color={isSelected ? '#fff' : theme.colors.text} />}
+        {icon && <PixelIcon name={icon} size={16} color={isSelected ? '#fff' : theme.colors.text} />}
         <PixelText
           style={[
             styles.filterButtonText,
@@ -143,14 +143,14 @@ export default function AchievementsScreen() {
       >
         <View style={styles.achievementHeader}>
           <View style={styles.achievementIconContainer}>
-            <UnifiedIcon 
+            <PixelIcon 
               name={achievement.icon} 
               size={32} 
               color={achievement.isUnlocked ? rarityColor : theme.colors.textSecondary}
             />
             {achievement.isUnlocked && (
               <View style={[styles.unlockBadge, { backgroundColor: rarityColor }]}>
-                <UnifiedIcon name="check" size={12} color="#fff" />
+                <PixelIcon name="check" size={12} color="#fff" />
               </View>
             )}
           </View>
@@ -283,7 +283,7 @@ export default function AchievementsScreen() {
           
           {filteredAchievements.length === 0 ? (
             <View style={styles.emptyState}>
-              <UnifiedIcon name="achievement" size={48} color={theme.colors.textSecondary} />
+              <PixelIcon name="achievement" size={48} color={theme.colors.textSecondary} />
               <PixelText style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
                 No achievements match your filters
               </PixelText>
@@ -312,7 +312,7 @@ export default function AchievementsScreen() {
             {selectedAchievement && (
               <>
                 <View style={styles.modalHeader}>
-                  <UnifiedIcon 
+                  <PixelIcon 
                     name={selectedAchievement.icon} 
                     size={48} 
                     color={getRarityColor(selectedAchievement.rarity)}

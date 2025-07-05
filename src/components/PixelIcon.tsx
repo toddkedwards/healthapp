@@ -217,7 +217,7 @@ const PIXEL_ICONS: { [key: string]: string } = {
   distance_walked: '🗺️',
   active_minutes: '⏱️',
 
-  // MISSING ICONS - ADDED FOR CONSISTENCY
+  // MISSING ICONS - ADDED BACK
   lock: '🔒',
   question: '❓',
   refresh: '🔄',

@@ -8,8 +8,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { ExerciseLog } from './QuickLogSection';
 import PixelText from './PixelText';
-import UnifiedIcon from './UnifiedIcon';
-
+import PixelArtIcon from './PixelArtIcon';
+import PixelIcon from './PixelIcon';
 import { RetroButton } from './RetroButton';
 import { soundService } from '../services/soundService';
 
@@ -61,7 +61,7 @@ export default function ExerciseHistory({ exercises, maxItems = 5 }: ExerciseHis
           📊 Recent Workouts
         </PixelText>
         <View style={styles.emptyState}>
-          <UnifiedIcon name="fitness" size={32} color={theme.colors.textSecondary} />
+          <PixelIcon name="fitness" size={32} color={theme.colors.textSecondary} />
           <PixelText style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
             No workouts logged yet
           </PixelText>
@@ -98,8 +98,8 @@ export default function ExerciseHistory({ exercises, maxItems = 5 }: ExerciseHis
           <View key={exercise.id} style={styles.exerciseItem}>
             <View style={styles.exerciseHeader}>
               <View style={styles.exerciseType}>
-                <UnifiedIcon 
-                  name={exercise.type} 
+                <PixelArtIcon 
+                  type={exercise.type} 
                   size={20} 
                   color={getExerciseColor(exercise.type)} 
                 />

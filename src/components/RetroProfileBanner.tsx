@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useUser } from '../context/UserContext';
-import UnifiedIcon from './UnifiedIcon';
+import PixelIcon from './PixelIcon';
 
 const RetroProfileBanner: React.FC = () => {
   const { user } = useUser();
@@ -11,7 +11,7 @@ const RetroProfileBanner: React.FC = () => {
       <View style={styles.avatarContainer}>
         <View style={styles.avatar}>
           {user.avatar ? (
-            <UnifiedIcon name={user.avatar} size={48} />
+            <PixelIcon name={user.avatar} size={48} />
           ) : (
             <Text style={styles.avatarText}>{user.username.charAt(0)}</Text>
           )}
@@ -30,7 +30,7 @@ const RetroProfileBanner: React.FC = () => {
         </View>
       </View>
       <View style={styles.coinsContainer}>
-        <UnifiedIcon name="coin" size={20} color="#fff" />
+        <PixelIcon name="coin" size={20} color="#fff" />
         <Text style={styles.coins}>{user.coins}</Text>
       </View>
     </View>
