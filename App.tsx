@@ -10,6 +10,7 @@ import { QuestProvider } from './src/context/QuestContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { AudioProvider } from './src/context/AudioContext';
 import { soundService } from './src/services/soundService';
+import { notificationService } from './src/services/notificationService';
 import RetroLoadingScreen from './src/components/RetroLoadingScreen';
 
 // Screens
@@ -23,6 +24,7 @@ import AchievementsScreen from './src/screens/AchievementsScreen';
 import PixelArtGalleryScreen from './src/screens/PixelArtGalleryScreen';
 import AudioSettingsScreen from './src/screens/AudioSettingsScreen';
 import { HealthSettingsScreen } from './src/screens/HealthSettingsScreen';
+import NotificationSettingsScreen from './src/screens/NotificationSettingsScreen';
 import AuthScreen from './src/screens/AuthScreen';
 import AdminScreen from './src/screens/AdminScreen';
 
@@ -36,6 +38,9 @@ function MainApp() {
   useEffect(() => {
     // Initialize sound service
     soundService.initialize();
+    
+    // Initialize notification service
+    notificationService.initialize();
     
     // Simulate loading progress
     const loadingInterval = setInterval(() => {
@@ -118,6 +123,8 @@ function MainApp() {
                     iconName = focused ? 'fitness' : 'fitness-outline';
                   } else if (route.name === 'Admin') {
                     iconName = focused ? 'shield' : 'shield-outline';
+                  } else if (route.name === 'Notifications') {
+                    iconName = focused ? 'notifications' : 'notifications-outline';
                   } else {
                     iconName = 'help-outline';
                   }
@@ -147,10 +154,11 @@ function MainApp() {
               <Tab.Screen name="Pixel Art" component={PixelArtGalleryScreen} />
               <Tab.Screen name="Audio" component={AudioSettingsScreen} />
               <Tab.Screen name="Health" component={HealthSettingsScreen} />
+              <Tab.Screen name="Notifications" component={NotificationSettingsScreen} />
               <Tab.Screen name="Profile" component={ProfileScreen} />
               <Tab.Screen name="Character Sheet" component={CharacterSheetScreen} />
               <Tab.Screen name="Admin" component={AdminScreen} />
-                          </Tab.Navigator>
+            </Tab.Navigator>
           </NavigationContainer>
           </NotificationProvider>
         </QuestProvider>

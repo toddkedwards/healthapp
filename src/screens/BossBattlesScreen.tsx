@@ -14,6 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
 import { useNotification } from '../context/NotificationContext';
 import { soundService } from '../services/soundService';
+import { notificationService } from '../services/notificationService';
 import { ENHANCED_BOSSES } from '../data/bossData';
 import { mockAbilities } from '../data/mockData';
 import { Boss, Ability } from '../types';
@@ -67,6 +68,12 @@ export default function BossBattlesScreen() {
               showNotification(
                 `${combatState.currentBoss?.name} defeated! +${combatState.currentBoss?.rewards.xp} XP, +${combatState.currentBoss?.rewards.coins} coins!`,
                 'success'
+              );
+              
+              // Send push notification for boss defeat
+              notificationService.sendBossBattleInvitation(
+                combatState.currentBoss?.name || 'Unknown Boss',
+                combatState.currentBoss?.level || 1
               );
               
               addXP(combatState.currentBoss?.rewards.xp || 0);

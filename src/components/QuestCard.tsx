@@ -6,6 +6,7 @@ import { useQuest } from '../context/QuestContext';
 import { useUser } from '../context/UserContext';
 import { useNotification } from '../context/NotificationContext';
 import { soundService } from '../services/soundService';
+import { notificationService } from '../services/notificationService';
 import PixelIcon from './PixelIcon';
 import { RetroButton } from './RetroButton';
 
@@ -79,6 +80,15 @@ export const QuestCard: React.FC<QuestCardProps> = ({ quest, style, onPress }) =
                 `Quest completed! +${quest.rewards.xp} XP, +${quest.rewards.coins} coins!`,
                 'success'
               );
+              
+              // Send push notification
+              notificationService.sendNotification({
+                type: 'quest',
+                title: '🎯 Quest Completed!',
+                body: `${quest.title}: +${quest.rewards.xp} XP, +${quest.rewards.coins} coins earned!`,
+                data: { questId: quest.id, questTitle: quest.title, rewards: quest.rewards }
+              });
+              
               console.log('Quest completion process finished');
             },
           },
@@ -99,6 +109,15 @@ export const QuestCard: React.FC<QuestCardProps> = ({ quest, style, onPress }) =
       `Quest completed! +${quest.rewards.xp} XP, +${quest.rewards.coins} coins!`,
       'success'
     );
+    
+    // Send push notification
+    notificationService.sendNotification({
+      type: 'quest',
+      title: '🎯 Quest Completed!',
+      body: `${quest.title}: +${quest.rewards.xp} XP, +${quest.rewards.coins} coins earned!`,
+      data: { questId: quest.id, questTitle: quest.title, rewards: quest.rewards }
+    });
+    
     console.log('Quest completion process finished');
     setShowConfirmDialog(false);
   };
