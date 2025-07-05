@@ -224,10 +224,43 @@ export class EnhancedAuthService {
       console.log('✅ Firebase authentication successful:', firebaseUser.uid);
       
       console.log('📊 Loading user profile...');
-      const userProfile = await this.getUserProfile(firebaseUser.uid);
+      let userProfile = await this.getUserProfile(firebaseUser.uid);
+      
+      // If user profile doesn't exist, create it (recovery mechanism)
       if (!userProfile) {
-        console.error('❌ User profile not found in Firestore');
-        throw new Error('User profile not found. Please contact support.');
+        console.log('⚠️ User profile not found, creating recovery profile...');
+        const username = firebaseUser.displayName || email.split('@')[0];
+        
+        const recoveryUser: User = {
+          id: firebaseUser.uid,
+          name: username,
+          username,
+          email: firebaseUser.email || email,
+          level: 1,
+          xp: 0,
+          xpToNextLevel: 100,
+          totalXp: 0,
+          health: 100,
+          maxHealth: 100,
+          energy: 50,
+          maxEnergy: 50,
+          strength: 10,
+          agility: 10,
+          intelligence: 10,
+          stamina: 10,
+          defense: 10,
+          coins: 50,
+          characterClass: 'warrior',
+          unlockedAbilities: [],
+          achievements: [],
+          equipment: [],
+          createdAt: new Date(),
+          lastActive: new Date(),
+        };
+
+        await this.createUserProfile(firebaseUser.uid, recoveryUser);
+        userProfile = recoveryUser;
+        console.log('✅ Recovery user profile created successfully');
       }
       
       this.currentUser = userProfile;
@@ -270,7 +303,45 @@ export class EnhancedAuthService {
         console.log('🔄 Auth state change detected:', firebaseUser ? 'User present' : 'No user');
         
         if (firebaseUser) {
-          const userProfile = await this.getUserProfile(firebaseUser.uid);
+          let userProfile = await this.getUserProfile(firebaseUser.uid);
+          
+          // If user profile doesn't exist, create it (recovery mechanism)
+          if (!userProfile) {
+            console.log('⚠️ User profile not found in auth state change, creating recovery profile...');
+            const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User';
+            
+            const recoveryUser: User = {
+              id: firebaseUser.uid,
+              name: username,
+              username,
+              email: firebaseUser.email || '',
+              level: 1,
+              xp: 0,
+              xpToNextLevel: 100,
+              totalXp: 0,
+              health: 100,
+              maxHealth: 100,
+              energy: 50,
+              maxEnergy: 50,
+              strength: 10,
+              agility: 10,
+              intelligence: 10,
+              stamina: 10,
+              defense: 10,
+              coins: 50,
+              characterClass: 'warrior',
+              unlockedAbilities: [],
+              achievements: [],
+              equipment: [],
+              createdAt: new Date(),
+              lastActive: new Date(),
+            };
+
+            await this.createUserProfile(firebaseUser.uid, recoveryUser);
+            userProfile = recoveryUser;
+            console.log('✅ Recovery user profile created in auth state change');
+          }
+          
           console.log('📊 User profile loaded:', userProfile?.username);
           callback(userProfile);
         } else {
